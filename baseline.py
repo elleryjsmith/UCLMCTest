@@ -37,4 +37,3 @@ for story in stories:
         print ansstr + " (Incorrect)\n"
 
 print "\n\n########\n\nQuestions answered: %d\nCorrect Answers: %d\nResult: %d%%" % (total, score, (score * 1.0 / total) * 100)
-
