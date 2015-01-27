@@ -1,4 +1,25 @@
-from storyparser import storyparser, Question, similarity, answers
+from storyparser import storyparser, Question, answers
+
+
+def similarity(s1, s2):
+    sim = []
+    file = open("MCTest/stopwords.txt", 'r')
+    try:
+        txt = file.read()
+        stopwords = txt.split('\r\n')
+        for w1, l1, p1 in s1:
+            if w1 in stopwords or l1 in stopwords:
+                continue
+            for w2, l2, p2 in s2:
+                if w2 in stopwords or l2 in stopwords:
+                    continue
+                elif l2 == l1:
+                    sim.append((w1, l1, p1))
+                    break
+    finally:
+        file.close()
+        return sim
+
 
 def score(story, question_n, answer_n):
     question = story.questions[question_n]
@@ -6,6 +27,7 @@ def score(story, question_n, answer_n):
     qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
     similarities = [similarity(qa_pair, s.parse.lemma) for s in story.sentences]
     return (max([len(s) for s in similarities]), similarities)
+
 
 def baseline(stories, solutions, mode=None, debug=False):
     scored, total = 0, 0
