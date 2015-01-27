@@ -8,6 +8,7 @@ from edu.stanford.nlp.parser.lexparser import LexicalizedParser, Options
 from edu.stanford.nlp.ling import WordTag
 from edu.stanford.nlp.trees import TreePrint
 from java.io import StringReader
+from java.lang import NullPointerException
 
 
 stopwords = []
@@ -44,6 +45,12 @@ class Story:
     return stry
 
 
+  @staticmethod
+  def fromcache(entry):
+
+    return Story([Sentence.fromcache(s) for s in entry["sentences"]],[Question.fromcache(q) for q in entry["questions"]],None)
+
+
   def __repr__(self):
 
     return "Story(%r,%r,%r)" % (self.sentences,self.questions,self.parser)
@@ -54,6 +61,10 @@ class Story:
 
     return s + "\n\nQuestions:\n\n" + "".join([str(q) for q in self.questions])
 
+  def parserepr(self):
+
+    return {"sentences":[s.parserepr() for s in self.sentences],"questions":[q.parserepr() for q in self.questions]}
+      
 
   def _extractsentences(self, text):
 
@@ -61,7 +72,11 @@ class Story:
 
     for snt in DocumentPreprocessor(StringReader(text)):
       
-      snts.append(Sentence(snt,self.parser))
+      s = Sentence(snt,self.parser)
+      
+      s.parse = s._parse()
+
+      snts.append(s)
 
     return snts
 
@@ -73,7 +88,7 @@ class Sentence:
     self.tokens = tokens
     self.parser = parser
 
-    self.parse = self._parse()
+    self.parse = None
 
 
   @staticmethod
@@ -81,13 +96,32 @@ class Sentence:
 
     tkns = PTBTokenizer(StringReader(string),WordTokenFactory(),"").tokenize()
 
-    return Sentence(tkns,parser)
+    s = Sentence(tkns,parser)
+    
+    s.parse = s._parse()
+
+    return s
+
+
+  @staticmethod
+  def fromcache(entry):
+
+    s = Sentence(entry["tokens"],None)
+
+    s.parse = SentenceParse.fromcache(entry["parse"])
+
+    return s
 
 
   def _parse(self):
 
     return self.parser.apply(self)
 
+    
+  def parserepr(self):
+
+    return {"string":str(self),"tokens":[repr(t) for t in self.tokens],"parse":self.parse.parserepr()}
+    
 
   def __repr__(self):
 
@@ -143,6 +177,11 @@ class Question:
 
     return qn
 
+  @staticmethod
+  def fromcache(entry):
+
+    return Question(entry["mode"],Sentence.fromcache(entry["question"]),[Sentence.fromcache(a) for a in entry["answers"]],None)
+
   
   def __repr__(self):
 
@@ -152,9 +191,13 @@ class Question:
 
     s = "Q:%s\n\n" % (self.qsentence) 
 
-    s += "\n".join(["A%d:%s" % (i,a)for i,a in enumerate(self.answers)])
+    s += "\n".join(["A%d:%s" % (i,a) for i,a in enumerate(self.answers)])
 
     return s + "\n\n"
+
+  def parserepr(self):
+
+    return {"mode":self.mode,"question":self.qsentence.parserepr(),"answers":[a.parserepr() for a in self.answers]}
 
 
 class Parser:
@@ -182,9 +225,9 @@ class Parser:
 
       sys.stderr.write("Parsing sentence: \"%s\"\n" % (sentence))
 
-    return SentenceParse(self,self.parser.apply(sentence.tokens))
-
+    return SentenceParse.fromtree(self,self.parser.apply(sentence.tokens))
     
+
   def __repr__(self):
 
     return "Parser(%r,%r,%r)" % (self.path,self.opt,self.debug)
@@ -196,10 +239,18 @@ class SentenceParse:
   def __init__(self, parser, tree):
 
     self.parser = parser
-    
     self.tree = tree
+    self.lemma = None
 
-    self.lemma = self._lemmatize()
+  
+  @staticmethod
+  def fromtree(parser, tree):
+
+    sp = SentenceParse(parser,tree)
+    
+    sp.lemma = sp._lemmatize()
+
+    return sp
 
     
   def _lemmatize(self):
@@ -231,9 +282,24 @@ class SentenceParse:
       return clst
 
 
+  @staticmethod
+  def fromcache(entry):
+
+    sp = SentenceParse(None,entry["tree"])
+
+    sp.lemma = entry["lemma"]
+
+    return sp
+
+      
+  def parserepr(self):
+
+    return {"tree":repr(self.tree),"lemma":self.lemma}
+
+
   def __repr__(self):
 
-    return "SentenceParser(%r,%r)" % (self.parser,self.tree)
+    return "SentenceParse(%r,%r)" % (self.parser,self.tree)
 
   def __str__(self):
 
@@ -242,9 +308,7 @@ class SentenceParse:
 
 def similarity(s1, s2):
 
-  global stopwords
-  
-  sim = 0
+  sim = []
 
   for w1,l1,p1 in s1:
 
@@ -260,7 +324,7 @@ def similarity(s1, s2):
 
       elif l2 == l1:
 
-        sim += 1
+        sim.append((w1,l1,p1))
 
         break
 
@@ -272,13 +336,13 @@ def answers(stories):
   with open("MCTest/" + stories + ".ans","r") as fl:
 
     soln = csv.reader(fl,delimiter='\t')
-
+    
     for rw in soln:
-
+      
       yield rw
 
 
-def storyparser(stories, parsefile, options=[], debug=False):
+def storyparser(stories, parsefile="", options=[], debug=False):
 
 
   global stopwords
@@ -290,13 +354,26 @@ def storyparser(stories, parsefile, options=[], debug=False):
   stopwords = txt.split('\r\n')
 
 
-  parser = Parser(parsefile,options,debug)
+  if parsefile != "":
 
-
-  with open("MCTest/" + stories + ".tsv","r") as fl:
+    parser = Parser(parsefile,options,debug)
     
-    mc = csv.reader(fl,delimiter='\t')
-
-    for rw in mc:
+    
+    with open("MCTest/" + stories + ".tsv","r") as fl:
       
-      yield Story.fromdata(rw,parser)
+      mc = csv.reader(fl,delimiter='\t')
+      
+      for rw in mc:
+        
+        yield Story.fromdata(rw,parser)
+
+
+  else:
+
+    with open("MCTest/" + stories + ".prs","r") as fl:
+
+      for ln in fl:
+
+        yield Story.fromcache(eval(ln))
+
+

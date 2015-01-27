@@ -7,7 +7,12 @@ testset = "mc160.dev"
 parserfile = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
 
 
-stories = storyparser(testset,parserfile,debug=True)
+#stories = storyparser(testset,parserfile,debug=True)
+
+stories = storyparser(testset)
+
+
+solutions = answers(testset)
 
 
 score,total = 0,0
@@ -15,8 +20,8 @@ score,total = 0,0
 
 for story in stories:
 
-  solutions = answers(testset).next()
-
+  solution = solutions.next()
+ 
   print story
 
 
@@ -28,7 +33,7 @@ for story in stories:
       continue
 
 
-    print "Q:" + str(question.qsentence)
+    print "\n###\n\nQ:%s\n" % (question.qsentence)
     
 
     questionstrs = []
@@ -38,7 +43,7 @@ for story in stories:
       questionstrs.append((question.qsentence.parse.lemma + answer.parse.lemma,answer,chr(i + 0x41)))
 
     
-    bestmatch = (None,0,-1)
+    bestmatch = (None,None,[],-1)
 
 
     for qstr,ans,i in questionstrs:
@@ -49,24 +54,25 @@ for story in stories:
 
         sim = similarity(qstr,sentence.parse.lemma)
 
-        if sim > bestmatch[1]:
 
-          bestmatch = (ans,sim,i)
+        if len(sim) > len(bestmatch[2]):
+
+          bestmatch = (sentence,ans,sim,i)
 
 
     total += 1
 
-    ansstr = "A:" + str(bestmatch[0])
+    ansstr = "Matched sentence:%s\n\nA:%s\n\nMatched words: %s\n" % (bestmatch[0],bestmatch[1],bestmatch[2])
 
-    if bestmatch[2] == solutions[n]:
+    if bestmatch[3] == solution[n]:
 
       score += 1
 
-      print ansstr + " (Correct)"
+      print ansstr + " (Correct)\n"
 
     else:
       
-      print ansstr + " (Incorrect)"
+      print ansstr + " (Incorrect)\n"
 
 
 print "\n\n########\n\nQuestions answered: %d\nCorrect Answers: %d\nResult: %d%%" % (total,score,(score*1.0/total)*100)
