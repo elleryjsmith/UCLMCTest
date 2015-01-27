@@ -57,9 +57,10 @@ def baseline(stories, solutions, mode=None, debug=False):
         "accuracy": (scored * 1.0 / total) * 100
     }
 
-testset = "mc160.dev"
-parserfile = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
-stories = storyparser(testset)
-solutions = answers(testset)
+if __name__ == "__main__":
+    testset = "mc160.dev"
+    parserfile = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
+    stories = storyparser(testset)
+    solutions = answers(testset)
 
-print baseline(stories, solutions, mode=Question.MULTIPLE, debug=False)
+    print baseline(stories, solutions, mode=Question.MULTIPLE, debug=False)
