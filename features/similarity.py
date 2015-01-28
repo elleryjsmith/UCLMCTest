@@ -1,24 +1,25 @@
-from storyparser import storyparser, Question, answers
+import sys
+sys.path.insert(0, '../')
+from UCLMCTest.classes import storyparser, Question, answers
+import nltk
+
+STOPWORDS = nltk.corpus.stopwords.words('english')
 
 
 def similarity(s1, s2):
     sim = []
-    file = open("MCTest/stopwords.txt", 'r')
-    try:
-        txt = file.read()
-        stopwords = txt.split('\r\n')
-        for w1, l1, p1 in s1:
-            if w1 in stopwords or l1 in stopwords:
+
+    for w1, l1, p1 in s1:
+        if w1 in STOPWORDS or l1 in STOPWORDS:
+            continue
+        for w2, l2, p2 in s2:
+            if w2 in STOPWORDS or l2 in STOPWORDS:
                 continue
-            for w2, l2, p2 in s2:
-                if w2 in stopwords or l2 in stopwords:
-                    continue
-                elif l2 == l1:
-                    sim.append((w1, l1, p1))
-                    break
-    finally:
-        file.close()
-        return sim
+            elif l2 == l1:
+                sim.append((w1, l1, p1))
+                break
+
+    return sim
 
 
 def score(story, question_n, answer_n):
@@ -59,7 +60,6 @@ def baseline(stories, solutions, mode=None, debug=False):
 
 if __name__ == "__main__":
     testset = "mc160.dev"
-    parserfile = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
     stories = storyparser(testset)
     solutions = answers(testset)
 
