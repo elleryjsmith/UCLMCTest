@@ -1,4 +1,7 @@
-from storyparser import storyparser, Question, similarity, answers
+import sys
+sys.path.insert(0, '../')
+from UCLMCTest.storyparser import storyparser, Question, answers, similarity
+
 testset = "mc160.dev"
 parserfile = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
 # stories = storyparser(testset, parserfile, debug=True)
