@@ -39,7 +39,7 @@ def baseline(stories, solutions, mode=None, debug=False):
     scored, total = 0, 0
     for story, solution in zip(stories, solutions):
         for q, question in enumerate(story.questions):
-            if question.mode == mode:
+            if question.mode != mode:
                 continue
             max_index, max_score = -1, (-1, None)
             for a, _ in enumerate(question.answers):
@@ -68,4 +68,4 @@ if __name__ == "__main__":
     stories = storyparser(testset)
     solutions = answers(testset)
 
-    print baseline(stories, solutions, mode=Question.MULTIPLE, debug=False)
+    print baseline(stories, solutions, mode=Question.SINGLE, debug=False)
