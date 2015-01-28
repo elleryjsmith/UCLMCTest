@@ -12,10 +12,16 @@ $ python
 # Install all-corpora
 ```
 
-## Test different features
+## Run it
 
+Test different features
 ```
 $ python features/bow.py
+```
+
+Test the classifier
+```
+$ python classifier.py
 ```
 
 ## Parsing text MCTest datasets
