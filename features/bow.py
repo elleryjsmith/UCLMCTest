@@ -2,6 +2,7 @@ import sys
 sys.path.insert(0, '../')
 from UCLMCTest.classes import storyparser, Question, answers
 import nltk
+import numpy as np
 
 STOPWORDS = nltk.corpus.stopwords.words('english')
 
@@ -33,6 +34,23 @@ def score(story, question_n, answer_n):
     qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
     similarities = [bow(qa_pair, s.parse.lemma) for s in story.sentences]
     return (max([len(s) for s in similarities]), similarities)
+
+def XVector(stories, norm=None):
+    X = []
+    for story in stories:
+        for q, question in enumerate(story.questions):
+            qa_scores = [score(story, q, a)[0] for a, _ in enumerate(question.answers)]
+
+            if (norm == "question"):
+                qa_scores = np.array(qa_scores)
+                qa_scores = (qa_scores / np.linalg.norm(qa_scores)).tolist()
+            X = X + qa_scores
+
+    if (norm == "all"):
+        X = np.array(X)
+        X = (X / np.linalg.norm(X)).tolist()
+
+    return X
 
 
 def baseline(stories, solutions, mode=None, debug=False):
@@ -67,5 +85,5 @@ if __name__ == "__main__":
     testset = "mc160.dev"
     stories = storyparser(testset)
     solutions = answers(testset)
-
+    scores(stories, norm="all")
     print baseline(stories, solutions, mode=Question.SINGLE, debug=False)
