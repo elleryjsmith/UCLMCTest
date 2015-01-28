@@ -7,8 +7,14 @@ STOPWORDS = nltk.corpus.stopwords.words('english')
 
 
 def bow(s1, s2):
-    sim = []
+    set1 = {l for w, l, p in s1 if l not in STOPWORDS} \
+        | {w for w, l, p in s1 if w not in STOPWORDS}
+    set2 = {l for w, l, p in s2 if l not in STOPWORDS} \
+        | {w for w, l, p in s2 if w not in STOPWORDS}
+    return set1 & set2
 
+def previous_bow(s1, s2):
+    sim = []
     for w1, l1, p1 in s1:
         if w1 in STOPWORDS or l1 in STOPWORDS:
             continue
@@ -18,7 +24,6 @@ def bow(s1, s2):
             elif l2 == l1:
                 sim.append((w1, l1, p1))
                 break
-
     return sim
 
 
