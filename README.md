@@ -28,9 +28,9 @@ To achieve the same results, do the following
 $ wget https://dl.dropboxusercontent.com/s/irqldm5553vhswr/stanford-parser.jar
 $ wget https://dl.dropboxusercontent.com/s/y8xvj42aabajauz/stanford-parser-3.5.0-models.jar
 ```
-- Run the old baseline that creates a cache file
+- Run the parse cache that creates a cache file
 ```
-$ python hacks/baseline.py
+jython -Dpython.path=stanford-parser.jar:stanford-parser-3.5.0-models.jar parsecache.py
 ```
 
 
