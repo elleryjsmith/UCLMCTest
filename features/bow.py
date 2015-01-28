@@ -38,7 +38,7 @@ def score(story, question_n, answer_n):
 
 
 # This returns [number of bagofwords] or [normalized bagofwords] or [sigmoid bagofwords]
-def XVectorQA(stories, norm=None, sigmoid_k=100, mode=None):
+def XVectorQA(stories, norm=None, sigmoid_k=50, mode=None):
     X = []
     for story in stories:
         for q, question in enumerate(story.questions):
@@ -50,9 +50,9 @@ def XVectorQA(stories, norm=None, sigmoid_k=100, mode=None):
                 qa_scores = np.array(qa_scores)
                 qa_scores = (qa_scores / np.linalg.norm(qa_scores)).tolist()
             if (norm == "sigmoid"):
-                qa_scores = np.array(qa_scores)
-                qa_scores = (qa_scores / np.linalg.norm(qa_scores)).tolist()
-                qa_scores = (qa_scores / ((1+ np.exp(-sigmoid_k*(qa_scores-np.mean(qa_scores)))))-0.25).tolist()
+                qa_scores = np.asarray(qa_scores)
+                qa_scores = (qa_scores / np.linalg.norm(qa_scores))
+                qa_scores = (2 / ((1+ np.exp(-sigmoid_k*(qa_scores-np.mean(qa_scores)))))-1).tolist()
 
             X = X + qa_scores
     if (norm == "all"):
