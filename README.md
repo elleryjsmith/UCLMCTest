@@ -1,13 +1,8 @@
 # UCLMCTest
 
-
-Basic MCTest system, uses lemmatization and bag-of-words matching
-
-Includes basic Python interface between the Stanford Parser and MCTest stories
+Improving on the MCTest
 
 ## To set up
-
-### Set up python
 
 ```
 $ pip install nltk numpy scipy
@@ -17,12 +12,25 @@ $ python
 # Install all-corpora
 ```
 
-### TODO How to set up Jython and produce the parse trees with Stanford Parser
+## Test different features
 
-Stanford Parser .jars:
+```
+$ python features/bow.py
+```
+
+## Parsing text MCTest datasets
+
+We parse MCTest datasets with the Stanford parser.
+To achieve the same results, do the following
+
+- GetStanford Parser .jars:
 ```
 $ wget https://dl.dropboxusercontent.com/s/irqldm5553vhswr/stanford-parser.jar
 $ wget https://dl.dropboxusercontent.com/s/y8xvj42aabajauz/stanford-parser-3.5.0-models.jar
+```
+- Run the old baseline that creates a cache file
+```
+$ python hacks/baseline.py
 ```
 
 

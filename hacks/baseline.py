@@ -5,7 +5,7 @@ from UCLMCTest.storyparser import storyparser, Question, answers, similarity
 testset = "mc160.dev"
 parserfile = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
 # stories = storyparser(testset, parserfile, debug=True)
-stories = storyparser(testset)
+stories = storyparser(testset, parserfile)
 solutions = answers(testset)
 score, total = 0, 0
 

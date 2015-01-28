@@ -6,7 +6,7 @@ import nltk
 STOPWORDS = nltk.corpus.stopwords.words('english')
 
 
-def similarity(s1, s2):
+def bow(s1, s2):
     sim = []
 
     for w1, l1, p1 in s1:
@@ -26,7 +26,7 @@ def score(story, question_n, answer_n):
     question = story.questions[question_n]
     answer = question.answers[answer_n]
     qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
-    similarities = [similarity(qa_pair, s.parse.lemma) for s in story.sentences]
+    similarities = [bow(qa_pair, s.parse.lemma) for s in story.sentences]
     return (max([len(s) for s in similarities]), similarities)
 
 
