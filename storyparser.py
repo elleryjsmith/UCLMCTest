@@ -238,7 +238,7 @@ def similarity(s1, s2):
 
 
 def answers(stories):
-    with open("MCTest/" + stories + ".ans", "r") as fl:
+    with open("datasets/" + stories + ".ans", "r") as fl:
         soln = csv.reader(fl, delimiter='\t')
 
         for rw in soln:
@@ -247,18 +247,18 @@ def answers(stories):
 
 def storyparser(stories, parsefile="", options=[], debug=False):
     global stopwords
-    with open("MCTest/stopwords.txt", "r") as fl:
+    with open("datasets/stopwords.txt", "r") as fl:
         txt = fl.read()
     stopwords = txt.split('\r\n')
 
     if parsefile != "":
         parser = Parser(parsefile, options, debug)
 
-        with open("MCTest/" + stories + ".tsv", "r") as fl:
+        with open("datasets/" + stories + ".tsv", "r") as fl:
             mc = csv.reader(fl, delimiter='\t')
             for rw in mc:
                 yield Story.fromdata(rw, parser)
     else:
-        with open("MCTest/" + stories + ".prs", "r") as fl:
+        with open("datasets/" + stories + ".prs", "r") as fl:
             for ln in fl:
                 yield Story.fromcache(eval(ln))
