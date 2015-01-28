@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, '../')
-from UCLMCTest.classes import storyparser, Question, answers
+from UCLMCTest.classes import storyparser, Question, answers, results, YVectorQA, YVectorQ
 import nltk
 import numpy as np
 
@@ -13,6 +13,7 @@ def bow(s1, s2):
     set2 = {l for w, l, p in s2 if l not in STOPWORDS} \
         | {w for w, l, p in s2 if w not in STOPWORDS}
     return set1 & set2
+
 
 def previous_bow(s1, s2):
     sim = []
@@ -35,17 +36,51 @@ def score(story, question_n, answer_n):
     similarities = [bow(qa_pair, s.parse.lemma) for s in story.sentences]
     return (max([len(s) for s in similarities]), similarities)
 
-def XVector(stories, norm=None):
+
+# This returns [number of bagofwords] or [normalized bagofwords] or [sigmoid bagofwords]
+def XVectorQA(stories, norm=None, sigmoid_k=50, mode=None):
     X = []
     for story in stories:
         for q, question in enumerate(story.questions):
+            if mode and question.mode != mode:
+                continue
             qa_scores = [score(story, q, a)[0] for a, _ in enumerate(question.answers)]
 
             if (norm == "question"):
                 qa_scores = np.array(qa_scores)
                 qa_scores = (qa_scores / np.linalg.norm(qa_scores)).tolist()
-            X = X + qa_scores
+            if (norm == "sigmoid"):
+                qa_scores = np.asarray(qa_scores)
+                qa_scores = (qa_scores / np.linalg.norm(qa_scores))
+                qa_scores = (2 / ((1+ np.exp(-sigmoid_k*(qa_scores-np.mean(qa_scores)))))-1).tolist()
 
+            X = X + qa_scores
+    if (norm == "all"):
+        X = np.array(X)
+        X = (X / np.linalg.norm(X)).tolist()
+
+    return X
+
+
+# This returns [(score, confidence)]
+def XVectorQ(stories, norm=None, sigmoid_k=100, mode=None):
+    X = []
+    for story in stories:
+        for q, question in enumerate(story.questions):
+            if mode and question.mode != mode:
+                continue
+            qa_scores = [score(story, q, a)[0] for a, _ in enumerate(question.answers)]
+
+            if (norm == "question"):
+                qa_scores = np.array(qa_scores)
+                qa_scores = (qa_scores / np.linalg.norm(qa_scores)).tolist()
+            if (norm == "sigmoid"):
+                qa_scores = np.array(qa_scores)
+                qa_scores = (qa_scores / np.linalg.norm(qa_scores)).tolist()
+                qa_scores = (qa_scores / (1+ np.exp(-sigmoid_k*(qa_scores-np.mean(qa_scores))))).tolist()
+
+            answer = qa_scores.index(max(qa_scores))
+            X.append((answer, qa_scores[answer]))
     if (norm == "all"):
         X = np.array(X)
         X = (X / np.linalg.norm(X)).tolist()
@@ -57,7 +92,7 @@ def baseline(stories, solutions, mode=None, debug=False):
     scored, total = 0, 0
     for story, solution in zip(stories, solutions):
         for q, question in enumerate(story.questions):
-            if question.mode != mode:
+            if mode and question.mode != mode:
                 continue
             max_index, max_score = -1, (-1, None)
             for a, _ in enumerate(question.answers):
@@ -83,7 +118,12 @@ def baseline(stories, solutions, mode=None, debug=False):
 
 if __name__ == "__main__":
     testset = "mc160.dev"
-    stories = storyparser(testset)
-    solutions = answers(testset)
-    scores(stories, norm="all")
-    print baseline(stories, solutions, mode=Question.SINGLE, debug=False)
+    stories = list(storyparser(testset))
+    solutions = list(answers(testset))
+    mode = Question.SINGLE
+    results(
+        XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode),
+        YVectorQ(stories, solutions, mode),
+        verbose=True
+    )
+    # print baseline(stories, solutions, mode=Question.SINGLE, debug=False)
