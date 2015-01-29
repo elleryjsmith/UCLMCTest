@@ -36,11 +36,7 @@ $ wget https://dl.dropboxusercontent.com/s/y8xvj42aabajauz/stanford-parser-3.5.0
 ```
 - Run the parse cache that creates a cache file
 ```
-jython -Dpython.path=stanford-parser.jar:stanford-parser-3.5.0-models.jar parsecache.py
+jython -Dpython.path=stanford-parser.jar:stanford-parser-3.5.0-models.jar parsecache.py mc[160|500][dev|train]
 ```
 
-
-Usage:
-
-jython -Dpython.path=stanford-parser.jar:stanford-parser-3.5.0-models.jar baseline.py > out.txt
 
