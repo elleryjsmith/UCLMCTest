@@ -1,11 +1,13 @@
 # Training set
 import numpy as np
+import sys
 import matplotlib.pyplot as plt
 from sklearn import svm
 from classifiers.perceptron import Perceptron
-from classes import storyparser, answers, Question, results, YVectorQA, YVectorQ
+from classes import storyparser, answers, Question
 from features import bow
 from sklearn.metrics import accuracy_score
+from vectors import results, YVectorQA, YVectorQ
 
 
 def svm_qa(stories, solutions, mode=None):
@@ -35,7 +37,7 @@ def svm_qa(stories, solutions, mode=None):
     Z = Z.reshape(xx.shape)
     plt.contourf(xx, yy, Z, cmap=plt.cm.Paired, alpha=0.8)
     plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.Paired)
-
+    
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
     plt.xticks(())

@@ -1,9 +1,39 @@
 from __future__ import with_statement
-from storyparser import storyparser
+from stanfordclasses import JStory, JParser
+from csv import reader as csvreader
+from sys import argv, stderr
 
-testset = "mc500.dev"
-parserfile = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
-stories = storyparser(testset, parserfile, debug=True)
 
-with open("datasets/" + testset + ".prs", "w") as fl:
-    fl.write("\n".join([repr(story.parserepr()) for story in stories]))
+def storyparser(stories, parsefile, options=[], debug=False):
+
+
+    parser = JParser(parsefile,options,debug)
+
+
+    with open("datasets/" + stories + ".tsv","r") as fl:
+
+        mc = csvreader(fl,delimiter='\t')
+
+        for rw in mc:
+
+            yield JStory.fromdata(rw,parser)
+
+
+if __name__ == "__main__":
+
+    if len(argv) == 2:
+
+        testset = argv[1]
+
+        parserfile = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
+
+        stories = storyparser(testset, parserfile, debug=True)
+
+
+        with open("datasets/" + testset + ".prs", "w") as fl:
+
+            fl.write("\n".join([repr(story.parserepr()) for story in stories]))
+
+    else:
+
+        stderr.write("Usage: jython parsecache.py <testset> (e.g. mc160.dev)\n")

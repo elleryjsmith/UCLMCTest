@@ -1,6 +1,7 @@
 import sys
 sys.path.insert(0, '../')
-from UCLMCTest.classes import storyparser, Question, answers, results, YVectorQA, YVectorQ
+from UCLMCTest.classes import storyparser, Question, answers
+from UCLMCTest.vectors import results, YVectorQA, YVectorQ
 import nltk
 import numpy as np
 
