@@ -118,6 +118,10 @@ def baseline(stories, solutions, mode=None, debug=False):
         "accuracy": (scored * 1.0 / total) * 100
     }
 
+
+def predict(stories, opts=None):
+    return XVectorQA(stories, norm="question")
+
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         testset = sys.argv[1]
