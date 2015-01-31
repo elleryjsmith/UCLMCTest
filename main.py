@@ -3,16 +3,14 @@ from classes import storyparser, Question, answers
 from grading import grading
 from vectors import results, YVectorQ
 from features import bow
+import classifier as svm
 import numpy as np
 
 testsets = ["mc160.dev", "mc500.dev", "mc160.train", "mc500.train"]
 
 methods = [
-    dict(
-        name="Baseline (BOW)",
-        score=bow.predict,
-        opts=None
-    )
+    dict(name="Baseline (BOW)", score=bow.predict, opts=None),
+    dict(name="SVM (only BOW)", score=svm.predict, opts=None)
 ]
 
 results = {}
