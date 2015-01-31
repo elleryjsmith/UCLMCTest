@@ -8,6 +8,7 @@ from classes import storyparser, answers, Question
 from features import bow
 from sklearn.metrics import accuracy_score
 from vectors import results, YVectorQA, YVectorQ
+from grading import grading
 
 
 def svm_qa(stories, solutions, mode=None):
@@ -27,6 +28,7 @@ def svm_qa(stories, solutions, mode=None):
     print "Single QA Correct   " + str(accuracy_score(y, svc.predict(X), normalize=False))
 
     results(svc.predict(X), YVectorQ(stories, solutions, mode), verbose=True)
+    grading(svc.predict(X), YVectorQ(stories, solutions, mode), verbose=True)
 
     # Plot
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
@@ -37,7 +39,7 @@ def svm_qa(stories, solutions, mode=None):
     Z = Z.reshape(xx.shape)
     plt.contourf(xx, yy, Z, cmap=plt.cm.Paired, alpha=0.8)
     plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.Paired)
-    
+
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
     plt.xticks(())
