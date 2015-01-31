@@ -118,13 +118,16 @@ def baseline(stories, solutions, mode=None, debug=False):
     }
 
 if __name__ == "__main__":
-    testset = "mc160.dev"
-    stories = list(storyparser(testset))
-    solutions = list(answers(testset))
-    mode = Question.SINGLE
-    results(
-        XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode),
-        YVectorQ(stories, solutions, mode),
-        verbose=True
-    )
-    # print baseline(stories, solutions, mode=Question.SINGLE, debug=False)
+    if len(sys.argv) == 2:
+        testset = sys.argv[1]
+        stories = list(storyparser(testset))
+        solutions = list(answers(testset))
+        mode = Question.SINGLE
+        results(
+            XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode),
+            YVectorQ(stories, solutions, mode),
+            verbose=True
+        )
+        # print baseline(stories, solutions, mode=Question.SINGLE, debug=False)
+    else:
+        sys.stderr.write("Usage: python %s <dataset> (e.g. mc160.dev)\n" % (sys.argv[0]));

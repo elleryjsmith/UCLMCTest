@@ -1,5 +1,5 @@
 from __future__ import with_statement
-
+import cPickle as pickle
 import csv
 
 
@@ -97,25 +97,102 @@ class SentenceParse(object):
 
     def __init__(self, tree):
         self.tree = tree
-        self.lemma = None
+        self.tokens = None
+        self.lemma = []
 
     @staticmethod
     def fromcache(entry):
         sp = SentenceParse(entry["tree"])
-        sp.lemma = entry["lemma"]
+        sp.tokens = dict([(i,Token.fromcache(e)) for i,e in entry["tokens"]])
+        sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
+        sp._unpackdeps(entry["dependencies"])
         return sp
+
+    def _packdeps(self):
+        
+        return [(g.index,d.index,r) for g,d,r in self.depgraph()]
+
+    def _unpackdeps(self, deps):
+
+        for g,d,r in deps:
+
+            self.tokens[g].link(self.tokens[d],r)
+
+    def depgraph(self):
+
+        return self._deptrv(self.tokens[0])
+
+    def _deptrv(self, node):
+
+        res = []
+        
+        node.vis ^= 1
+        
+        if len(node.dependents):
+            
+            for ch,_ in node.dependents:
+
+                if ch.vis ^ node.vis:
+                    
+                    res.extend(self._deptrv(ch))
+                
+        res.extend([(g,node,r) for g,r in node.governers])
+
+        return res
+
 
     def parserepr(self):
         return {
             "tree": repr(self.tree),
-            "lemma": self.lemma
+            "tokens": [(i,t.parserepr()) for i,t in self.tokens.items()],
+            "dependencies": self._packdeps()
         }
 
     def __repr__(self):
         return "SentenceParse(%r)" % (self.tree)
 
     def __str__(self):
-        return "Parse Tree:\n\n" + str(self.tree) + "\n\nLemmatization:\n\n" + str(self.lemma) + "\n\n"
+        return "Parse Tree:\n\n" + str(self.tree) + "\n\nTokens:\n\n" + str(self.tokens) + "\n\n"
+
+
+class Token(object):
+
+    def __init__(self, token, lemma, pos, index):
+
+        self.token = token
+        self.lemma = lemma
+        self.pos = pos
+        self.governers = []
+        self.dependents = []
+        self.vis = 0
+        self.index = index
+        self.synset = None
+
+    @staticmethod
+    def fromcache(entry):
+
+        return Token(entry["token"],entry["lemma"],entry["pos"],entry["index"])
+
+    def tagged(self):
+        
+        return (self.token,self.lemma,self.pos)
+
+    def link(self, dependent, rel):
+
+        self.dependents.append((dependent,rel))
+        dependent.governers.append((self,rel))
+
+    def parserepr(self):
+
+        return {"token":self.token,"lemma":self.lemma,"pos":self.pos,"index":self.index}
+
+    def __str__(self):
+
+        return str(self.tagged())
+
+    def __repr__(self):
+
+        return "Token(%r,%r,%r,%r)" % (self.token,self.lemma,self.pos,self.index)
 
 
 def answers(stories):
@@ -128,7 +205,8 @@ def answers(stories):
 
 def storyparser(stories):
     with open("datasets/" + stories + ".prs", "r") as fl:
-        for ln in fl:
-            yield Story.fromcache(eval(ln))
-
+        strys = pickle.load(fl)
+    for ln in strys:
+        yield Story.fromcache(ln)
+            
 

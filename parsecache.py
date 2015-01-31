@@ -2,6 +2,7 @@ from __future__ import with_statement
 from stanfordclasses import JStory, JParser
 from csv import reader as csvreader
 from sys import argv, stderr
+import cPickle as pickle
 
 
 def storyparser(stories, parsefile, options=[], debug=False):
@@ -19,6 +20,7 @@ def storyparser(stories, parsefile, options=[], debug=False):
             yield JStory.fromdata(rw,parser)
 
 
+
 if __name__ == "__main__":
 
     if len(argv) == 2:
@@ -27,13 +29,14 @@ if __name__ == "__main__":
 
         parserfile = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
 
-        stories = storyparser(testset, parserfile, debug=True)
+        options = ["-outputFormat","typedDependencies","-retainTmpSubcategories"]
 
+        stories = storyparser(testset,parserfile,options,True)
 
         with open("datasets/" + testset + ".prs", "w") as fl:
 
-            fl.write("\n".join([repr(story.parserepr()) for story in stories]))
+            pickle.dump([story.parserepr() for story in stories],fl)
 
     else:
 
-        stderr.write("Usage: jython parsecache.py <testset> (e.g. mc160.dev)\n")
+        stderr.write("Usage: jython %s <testset> (e.g. mc160.dev)\n" % (argv[0]))

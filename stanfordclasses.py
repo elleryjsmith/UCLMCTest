@@ -8,6 +8,9 @@ from edu.stanford.nlp.ling import WordTag
 from edu.stanford.nlp.trees import TreePrint
 from java.io import StringReader
 
+#sys.path.append("/usr/local/lib/python2.7/site-packages")
+#from nltk.corpus import wordnet
+
 
 class JStory(classes.Story):
 
@@ -136,9 +139,12 @@ class JParser:
 
         self.options = Options()
         self.options.setOptions(options)
-
+        
         self.morphology = Morphology()
         self.parser = LexicalizedParser.getParserFromFile(self.path,self.options)
+        self.langpack = self.parser.treebankLanguagePack()
+        self.gramfac = self.langpack.grammaticalStructureFactory()
+
 
     def apply(self, sentence):
 
@@ -168,7 +174,16 @@ class JSentenceParse(classes.SentenceParse):
 
         sp = JSentenceParse(parser,tree)
 
-        sp.lemma = sp._lemmatize()
+        tkn = sp._lemmatize()
+        sp.tokens = dict([(0,JToken("ROOT",None,None,0))])
+
+        for i,t in enumerate(tkn,1):
+            t.index = i
+            sp.tokens[i] = t
+
+        sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
+
+        sp._formdependencies()
 
         return sp
 
@@ -182,7 +197,7 @@ class JSentenceParse(classes.SentenceParse):
 
         wt = WordTag(word.value(),pos.value())
 
-        return (word.value(),self.parser.morphology.lemmatize(wt).lemma(),pos.value())
+        return JToken(word.value(),self.parser.morphology.lemmatize(wt).lemma(),pos.value(),0)
 
 
     def _dfs(self, tree, fn):
@@ -204,8 +219,26 @@ class JSentenceParse(classes.SentenceParse):
         return clst
 
 
+    def _formdependencies(self):
+
+        gstruc = self.parser.gramfac.newGrammaticalStructure(self.tree)
+
+        for rel in gstruc.typedDependenciesCCprocessed():
+            
+            gv = self.tokens[rel.gov().index()]
+            dp = self.tokens[rel.dep().index()]
+
+            if gv != dp:
+                gv.link(dp,rel.reln().getShortName())
+
 
     def __repr__(self):
 
         return "JSentenceParse(%r,%r)" % (self.parser,self.tree)
 
+
+class JToken(classes.Token):
+
+    def __repr__(self):
+
+        return "JToken(%r,%r,%r,%r)" % (self.token,self.lemma,self.pos,self.index)
