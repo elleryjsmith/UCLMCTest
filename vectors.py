@@ -3,23 +3,25 @@ import numpy as np
 from itertools import groupby
 
 
-def results(X, Y, verbose=False, ambiguity=0):
+def results(X, Y, verbose=False):
     # vector of all question scores [[0.11,0.88,0.12,0.9],[0.2...]]
     predicted_q = np.split(np.asarray(X), len(X) / 4)
     # (answer_number, isItPredicted?)
-    predicted_a = map(lambda x: (np.argmax(x), x[np.argmax(x)]), predicted_q)
+    predicted_a = map(lambda x: (np.argmax(x), x[np.argmax(x)], x), predicted_q)
     # remove the ones that have been guessed
     x_answered = []
     y_answered = []
     for i, pred in enumerate(predicted_a):
         # pred[1] is the confidence, if it is 0, then it is a random guess
-        if pred[1] != ambiguity:
+        if pred[2].tolist().count(pred[1]) != 1:
+            continue
+        if pred[1] != 0:
             x_answered.append(Y[i])
             y_answered.append(pred[0])
 
     if verbose:
         print "\n### Results ###"
-        print "# questions   " + str(len(X)/ 4)
+        print "# questions   " + str(len(X)/4)
         print "# answered   " + str(len(x_answered))
         print "# correct   " + str(accuracy_score(y_answered, x_answered, normalize=False))
         print "% correct   " + str(accuracy_score(y_answered, x_answered))
@@ -34,21 +36,39 @@ def orderby_score(answer_set):
     return list(answer_groups)
 
 
-def grading(X, Y, verbose=False):
+def grading(X, Y, verbose=False, detailed=False):
     # vector of all question answers [[0.11,0.88,0.12,0.9],[0.2...]]
     answer_sets = np.split(np.asarray(X), len(X) / 4)
     # questions divided by group of score [[(0.97,[0,1]), (0,[2,3])], ..]
     answer_sets_grouped = [orderby_score(a) for a in answer_sets]
     # the score is 1/(# groups till the answer + # equal answers)
     grades = []
+    grades_detailed = []
     for story_i, answer_group in enumerate(answer_sets_grouped):
         for group_i, answer in enumerate(answer_group):
             if Y[story_i] in answer[1]:
-                grades.append(1.0 / (group_i + len(answer[1])))
+                grade = 1.0 / (group_i + len(answer[1]))
+                grades.append(grade)
+                if verbose or detailed:
+                    grades_detailed.append(dict(
+                        grade=grade,
+                        equal=len(answer[1]),
+                        group=group_i,
+                        score=answer[0]
+                    ))
 
     if verbose:
-        print sum(grades), len(grades)
-        print sum(grades) / len(grades)
+        grades_sorted = sorted(grades_detailed, key=lambda x: x["grade"])
+        groups = groupby(grades_sorted, lambda x: x["grade"])
+        grades_grouped = list((k, list(g)) for k, g in groups)
+        print "### Grading ###"
+        print "# questions", len(grades)
+        for group in grades_grouped:
+            print "# partial credit (%lF) %i" % (group[0], len(group[1]))
+        print "# Total grade", sum(grades) / len(grades)
+        print ""
+    if detailed:
+        return grades_detailed
     return grades
 
 
