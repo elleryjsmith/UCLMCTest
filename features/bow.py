@@ -124,7 +124,7 @@ if __name__ == "__main__":
         stories = list(storyparser(testset))
         solutions = list(answers(testset))
         mode = None
-        X = XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode)
+        X = XVectorQA(stories, norm="question", sigmoid_k=10, mode=mode)
         Y = YVectorQ(stories, solutions, mode)
         results(X, Y, verbose=True)
         grading(X, Y, verbose=True)
