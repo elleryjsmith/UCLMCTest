@@ -24,6 +24,13 @@ Test the classifier
 $ python classifier.py
 ```
 
+## Test it
+
+Run the unit tests
+```
+$ python -m unittest discover -s tests -p '*_test.py'
+```
+
 ## Parsing text MCTest datasets
 
 We parse MCTest datasets with the Stanford parser.

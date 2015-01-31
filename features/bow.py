@@ -1,7 +1,7 @@
 import sys
 sys.path.insert(0, '../')
 from UCLMCTest.classes import storyparser, Question, answers
-from UCLMCTest.vectors import results, YVectorQA, YVectorQ
+from UCLMCTest.vectors import results, YVectorQA, YVectorQ, grading
 import nltk
 import numpy as np
 
@@ -122,12 +122,18 @@ if __name__ == "__main__":
         testset = sys.argv[1]
         stories = list(storyparser(testset))
         solutions = list(answers(testset))
-        mode = Question.SINGLE
+        mode = None
         results(
             XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode),
             YVectorQ(stories, solutions, mode),
             verbose=True
         )
+        grades = grading(
+            XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode),
+            YVectorQ(stories, solutions, mode)
+        )
+        print sum(grades), len(grades)
+        print sum(grades) / len(grades)
         # print baseline(stories, solutions, mode=Question.SINGLE, debug=False)
     else:
         sys.stderr.write("Usage: python %s <dataset> (e.g. mc160.dev)\n" % (sys.argv[0]));
