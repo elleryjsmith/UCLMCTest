@@ -124,16 +124,10 @@ if __name__ == "__main__":
         stories = list(storyparser(testset))
         solutions = list(answers(testset))
         mode = None
-        results(
-            XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode),
-            YVectorQ(stories, solutions, mode),
-            verbose=True
-        )
-        grades = grading(
-            XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode),
-            YVectorQ(stories, solutions, mode),
-            verbose=True
-        )
+        X = XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode)
+        Y = YVectorQ(stories, solutions, mode)
+        results(X, Y, verbose=True)
+        grading(X, Y, verbose=True)
         # print baseline(stories, solutions, mode=Question.SINGLE, debug=False)
     else:
         sys.stderr.write("Usage: python %s <dataset> (e.g. mc160.dev)\n" % (sys.argv[0]));
