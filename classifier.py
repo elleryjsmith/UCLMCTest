@@ -10,30 +10,36 @@ from sklearn.metrics import accuracy_score
 from vectors import results, YVectorQA, YVectorQ
 from grading import grading
 
-methods = [
-    dict(
-        name="Baseline (BOW)",
-        score=bow.predict,
-        opts=None
-    )
-]
-
+# methods = [dict(name="Baseline (BOW)", score=bow.predict, opts=None)]
 
 def train(stories, solutions, opts=None):
-    X = [m["score"](stories, solutions, m["opts"]) for m in methods]
-    y = np.array(YVectorQA(stories, solutions, mode=None))
-    h = 0.01
-    C = 1.0
+    # TODO this should be imported in this way
+    # features = [m["score"](stories, opts=m["opts"]) for m in methods]
+    # X = [tuple(t,) for t in np.asarray(features).T]
 
-    return svm.SVC(kernel='linear', C=C).fit(X, y)
+    X = np.array(zip(
+        bow.predict(stories),
+    ))
+    y = np.array(YVectorQA(stories, solutions))
+    C = 4.0
+
+    return svm.SVC(kernel='linear', C=C, probability=True).fit(X, y)
 
 
 def predict(stories, opts=None):
-    X = [m["score"](stories, solutions, m["opts"]) for m in methods]
+
+    X = np.array(zip(
+        bow.predict(stories),
+    ))
 
     # TODO this should be loaded not calculated
-    svc = train(stories, solutions, opts)
-    return svc.predict(X)
+    testset = "mc160.dev"
+    train_stories = list(storyparser(testset))
+    train_solutions = list(answers(testset))
+    svc = train(train_stories, train_solutions, opts=opts)
+    # END
+
+    return [x[1] for x in svc.predict_proba(X)]
 
 def svm_qa(stories, solutions, mode=None):
     qa = bow.XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode)
