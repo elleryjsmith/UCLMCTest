@@ -1,16 +1,19 @@
 from sklearn.metrics import accuracy_score
 import numpy as np
 
+
 def results(X, Y, verbose=False):
     # vector of all question scores [[0.11,0.88,0.12,0.9],[0.2...]]
     predicted_q = np.split(np.asarray(X), len(X) / 4)
     # (answer_number, isItPredicted?)
-    predicted_a = map(lambda x: (np.argmax(x), x[np.argmax(x)]), predicted_q)
+    predicted_a = map(lambda x: (np.argmax(x), x[np.argmax(x)], x), predicted_q)
     # remove the ones that have been guessed
     x_answered = []
     y_answered = []
     for i, pred in enumerate(predicted_a):
         # pred[1] is the confidence, if it is 0, then it is a random guess
+        if pred[2].tolist().count(pred[1]) != 1:
+            continue
         if pred[1] != 0:
             x_answered.append(Y[i])
             y_answered.append(pred[0])
