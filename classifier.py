@@ -10,6 +10,30 @@ from sklearn.metrics import accuracy_score
 from vectors import results, YVectorQA, YVectorQ
 from grading import grading
 
+methods = [
+    dict(
+        name="Baseline (BOW)",
+        score=bow.predict,
+        opts=None
+    )
+]
+
+
+def train(stories, solutions, opts=None):
+    X = [m["score"](stories, solutions, m["opts"]) for m in methods]
+    y = np.array(YVectorQA(stories, solutions, mode=None))
+    h = 0.01
+    C = 1.0
+
+    return svm.SVC(kernel='linear', C=C).fit(X, y)
+
+
+def predict(stories, opts=None):
+    X = [m["score"](stories, solutions, m["opts"]) for m in methods]
+
+    # TODO this should be loaded not calculated
+    svc = train(stories, solutions, opts)
+    return svc.predict(X)
 
 def svm_qa(stories, solutions, mode=None):
     qa = bow.XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode)
@@ -46,10 +70,10 @@ def svm_qa(stories, solutions, mode=None):
     plt.yticks(())
     plt.show()
 
+if __name__ == "__main__":
+    testset = "mc160.dev"
+    stories = list(storyparser(testset))
+    solutions = list(answers(testset))
+    mode = Question.SINGLE
 
-testset = "mc160.dev"
-stories = list(storyparser(testset))
-solutions = list(answers(testset))
-mode = Question.SINGLE
-
-svm_qa(stories, solutions, mode=mode)
+    svm_qa(stories, solutions, mode=mode)
