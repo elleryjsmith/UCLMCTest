@@ -5,7 +5,7 @@ from vectors import results, YVectorQ
 from features import bow
 import numpy as np
 
-testsets = ["mc160.dev", "mc500.dev", "mc160.train"]
+testsets = ["mc160.dev", "mc500.dev", "mc160.train", "mc500.train"]
 
 methods = [
     dict(
@@ -27,9 +27,7 @@ for method in methods:
 
         scores = method["score"](stories, method["opts"])
         grades = grading(scores, true)
-        results[name][testset] = sum(grades)/len(grades)
-
-print results
+        results[name][testset] = sum(grades) / len(grades)
 
 print "| Description | " + " | ".join(testsets) + " |"
 print "| " + ("--- | ---" * len(testsets)) + " |"
