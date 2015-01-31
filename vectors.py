@@ -45,6 +45,10 @@ def grading(X, Y, verbose=False):
         for group_i, answer in enumerate(answer_group):
             if Y[story_i] in answer[1]:
                 grades.append(1.0 / (group_i + len(answer[1])))
+
+    if verbose:
+        print sum(grades), len(grades)
+        print sum(grades) / len(grades)
     return grades
 
 

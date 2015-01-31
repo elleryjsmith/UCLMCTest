@@ -130,10 +130,9 @@ if __name__ == "__main__":
         )
         grades = grading(
             XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode),
-            YVectorQ(stories, solutions, mode)
+            YVectorQ(stories, solutions, mode),
+            verbose=True
         )
-        print sum(grades), len(grades)
-        print sum(grades) / len(grades)
         # print baseline(stories, solutions, mode=Question.SINGLE, debug=False)
     else:
         sys.stderr.write("Usage: python %s <dataset> (e.g. mc160.dev)\n" % (sys.argv[0]));
