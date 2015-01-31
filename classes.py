@@ -1,6 +1,7 @@
 from __future__ import with_statement
 import cPickle as pickle
 import csv
+import os
 
 
 class Story(object):
@@ -196,7 +197,8 @@ class Token(object):
 
 
 def answers(stories):
-    with open("datasets/" + stories + ".ans", "r") as fl:
+    dataset = os.path.abspath(os.path.dirname(__file__) + "/datasets/" + stories + ".ans");
+    with open(dataset, "r") as fl:
         soln = csv.reader(fl, delimiter='\t')
 
         for rw in soln:
@@ -204,7 +206,8 @@ def answers(stories):
 
 
 def storyparser(stories):
-    with open("datasets/" + stories + ".prs", "r") as fl:
+    dataset = os.path.abspath(os.path.dirname(__file__) + "/datasets/" + stories + ".prs");
+    with open(dataset, "r") as fl:
         strys = pickle.load(fl)
     for ln in strys:
         yield Story.fromcache(ln)
