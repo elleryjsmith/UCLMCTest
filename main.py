@@ -6,11 +6,17 @@ from features import bow
 import classifier as svm
 import numpy as np
 
-testsets = ["mc160.dev", "mc500.dev", "mc160.train", "mc500.train"]
+testsets = [
+    "mc160.dev"
+    , "mc500.dev"
+    , "mc160.train"
+    , "mc500.train"
+]
 
 methods = [
-    dict(name="Baseline (BOW)", score=bow.predict, opts=None),
-    dict(name="SVM (only BOW)", score=svm.predict, opts=None)
+    dict(name="Baseline (BOW) sentence", score=bow.predict, opts=None)
+    , dict(name="Baseline (BOW) all", score=bow.predictAll, opts=None)
+    , dict(name="SVM (only BOW)", score=svm.predict, opts=None)
 ]
 
 results = {}

@@ -2,11 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from itertools import groupby
 
+
 def orderby_score(answer_set):
     answer_sorted = [(a, answer_set[a]) for a in np.argsort(answer_set, axis=0)[::-1]]
     groups = groupby(answer_sorted, lambda x: answer_set[x[0]])
     answer_groups = ((k, [j[0] for j in g]) for k, g in groups)
     return list(answer_groups)
+
 
 def grading(X, Y, verbose=False, detailed=False):
     # vector of all question answers [[0.11,0.88,0.12,0.9],[0.2...]]
