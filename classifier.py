@@ -33,13 +33,14 @@ def predict(stories, opts=None):
     ))
 
     # TODO this should be loaded not calculated
-    testset = "mc160.dev"
-    train_stories = list(storyparser(testset))
-    train_solutions = list(answers(testset))
+    trainset = "mc160.train"
+    train_stories = list(storyparser(trainset))
+    train_solutions = list(answers(trainset))
     svc = train(train_stories, train_solutions, opts=opts)
     # END
 
     return [x[1] for x in svc.predict_proba(X)]
+
 
 def svm_qa(stories, solutions, mode=None):
     qa = bow.XVectorQA(stories, norm="sigmoid", sigmoid_k=10, mode=mode)
