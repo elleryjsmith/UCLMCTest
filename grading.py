@@ -18,16 +18,27 @@ def grading(X, Y, verbose=False, detailed=False):
     grades_detailed = []
     for story_i, answer_group in enumerate(answer_sets_grouped):
         for group_i, answer in enumerate(answer_group):
-            if Y[story_i] in answer[1]:
-                grade = 1.0 / (group_i + len(answer[1]))
-                grades.append(grade)
-                if verbose or detailed:
-                    grades_detailed.append(dict(
-                        grade=grade,
-                        equal=len(answer[1]),
-                        group=group_i,
-                        score=answer[0]
-                    ))
+            if group_i == 0:
+                if Y[story_i] in answer[1]:
+                    grade = 1.0 / (group_i + len(answer[1]))
+                    grades.append(grade)
+                    if verbose or detailed:
+                        grades_detailed.append(dict(
+                            grade=grade,
+                            equal=len(answer[1]),
+                            group=group_i,
+                            score=answer[0]
+                        ))
+            else:
+                if Y[story_i] in answer[1]:
+                    grades.append(0)
+                    if verbose or detailed:
+                        grades_detailed.append(dict(
+                            grade=0,
+                            equal=len(answer[1]),
+                            group=group_i,
+                            score=answer[0]
+                        ))
 
     if verbose:
         grades_sorted = sorted(grades_detailed, key=lambda x: x["grade"])
