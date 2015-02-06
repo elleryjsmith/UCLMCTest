@@ -105,6 +105,7 @@ class SentenceParse(object):
     def fromcache(entry):
         sp = SentenceParse()
         sp.tokens = dict([(i,Token.fromcache(e)) for i,e in entry["tokens"]])
+        sp.tokens[0].wordindex = 0
         for i,t in enumerate([t for _,t in sp.tokens.items() if t.isword()]):
             t.wordindex = i
         sp.root = sp.tokens[0]
@@ -112,6 +113,10 @@ class SentenceParse(object):
         sp._unpackdeps(entry["dependencies"])
         sp._unpacktree(entry["tree"])
         return sp
+
+    def words(self):
+
+        return dict([(t.wordindex,t) for _,t in self.tokens.items() if t.isword()])
 
     def _packdeps(self):
         
@@ -143,6 +148,10 @@ class SentenceParse(object):
 
         return res
 
+    def parsetree(self, mode="depth"):
+        
+        return self.root.parsetree(mode)
+
     def _packtree(self):
 
         return [(p.index,c.index) for l in self.root._parsedfs(self._parserel) for p,c in l]
@@ -172,7 +181,7 @@ class SentenceParse(object):
 
 
 class Token(object):
-#adj adj_sat adv noun verb
+
 
     def __init__(self, token, lemma, pos, index):
 
