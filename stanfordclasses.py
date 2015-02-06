@@ -177,9 +177,15 @@ class JSentenceParse(classes.SentenceParse):
         sp.root,tkn = sp._lemmatize(tree)
         sp.tokens = dict([(0,sp.root)])
 
+        sp.tokens[0].wordindex = 0
+        j = 1
         for i,t in enumerate(tkn,1):
             t.index = i
             sp.tokens[i] = t
+            if t.isword():
+                t.wordindex = j
+                j += 1
+                
 
         sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
 
@@ -232,12 +238,20 @@ class JSentenceParse(classes.SentenceParse):
 
         for rel in gstruc.typedDependenciesCCprocessed():
             
-            gv = self.tokens[rel.gov().index()]
-            dp = self.tokens[rel.dep().index()]
+            gv = self._wpostok(rel.gov().index())
+            dp = self._wpostok(rel.dep().index())
 
             if gv != dp:
                 gv.deplink(dp,rel.reln().getShortName())
 
+
+    def _wpostok(self, wpos):
+
+        for _,t in self.tokens.items():
+            
+            if not wpos or t.isword() and t.wordindex == wpos:
+                
+                return t
 
     def __repr__(self):
 
