@@ -36,10 +36,10 @@ def predict(stories, opts=None):
     if (not opts):
         opts = {}
 
-    if (not opts["trainsets"]):
+    if ("trainsets" not in opts):
         opts["trainsets"] = ["mc160.dev"]
 
-    if (not opts["train_stories"] or not opts["train_solutions"]):
+    if ("train_stories" not in opts or "train_solutions" not in opts):
         opts["train_stories"] = list(storyparser(opts["trainsets"]))
         opts["train_solutions"] = list(answers(opts["trainsets"]))
 
