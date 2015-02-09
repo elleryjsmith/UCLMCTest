@@ -196,20 +196,26 @@ class Token(object):
         return "Token(%r,%r,%r,%r)" % (self.token,self.lemma,self.pos,self.index)
 
 
-def answers(stories):
-    dataset = os.path.abspath(os.path.dirname(__file__) + "/datasets/" + stories + ".ans");
-    with open(dataset, "r") as fl:
-        soln = csv.reader(fl, delimiter='\t')
+def answers(datasets):
+    if type(datasets) != list:
+        datasets = [datasets]
 
-        for rw in soln:
-            yield rw
+    for dataset in datasets:
+        file = os.path.abspath(os.path.dirname(__file__) + "/datasets/" + dataset + ".ans");
+        with open(file, "r") as fl:
+            soln = csv.reader(fl, delimiter='\t')
+
+            for rw in soln:
+                yield rw
 
 
-def storyparser(stories):
-    dataset = os.path.abspath(os.path.dirname(__file__) + "/datasets/" + stories + ".prs");
-    with open(dataset, "r") as fl:
-        strys = pickle.load(fl)
-    for ln in strys:
-        yield Story.fromcache(ln)
-            
+def storyparser(datasets):
+    if type(datasets) != list:
+        datasets = [datasets]
 
+    for dataset in datasets:
+        file = os.path.abspath(os.path.dirname(__file__) + "/datasets/" + dataset + ".prs");
+        with open(file, "r") as fl:
+            strys = pickle.load(fl)
+        for ln in strys:
+            yield Story.fromcache(ln)
