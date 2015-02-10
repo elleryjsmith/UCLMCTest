@@ -8,7 +8,9 @@ testsets = [
     "mc160.dev",
     "mc500.dev",
     "mc160.train",
-    "mc500.train"
+    "mc500.train",
+    ["mc160.dev", "mc160.train"],
+    ["mc500.dev", "mc500.train"]
 ]
 
 methods = [
@@ -25,7 +27,7 @@ methods = [
         opts=dict(
             testsets=testsets
         )
-    ),
+    )
     dict(
         name="SVM (BOW) train mc160train",
         score=svm.predict,
@@ -48,7 +50,7 @@ results = {}
 for method in methods:
     results[method["name"]] = {}
     for testset in testsets:
-        results[method["name"]][testset] = "0"
+        results[method["name"]][str(testset)] = "0"
 
 for method in methods:
     name = method["name"]
@@ -59,14 +61,14 @@ for method in methods:
         true = YVectorQ(stories, solutions)
         scores = method["score"](stories, method["opts"])
         grades = grading(scores, true)
-        results[name][testset] = sum(grades) / len(grades)
-        print results[name][testset]
+        results[name][str(testset)] = sum(grades) / len(grades)
+        print results[name][str(testset)]
 
 print "\n"
-print "| Description | " + " | ".join(testsets) + " |"
+print "| Description | " + " | ".join([str(x) for x in testsets]) + " |"
 print "| " + ("--- | ---" * len(testsets)) + " |"
 for method in methods:
-    m_results = [results[method["name"]][t] for t in testsets]
+    m_results = [results[method["name"]][str(t)] for t in testsets]
     print "| %s | %s |" % (
         method["name"],
         " | ".join([str(r) for r in m_results])
