@@ -11,6 +11,33 @@ def orderby_score(answer_set):
 
 
 def grading(X, Y, verbose=False, detailed=False):
+    answer_sets = np.split(np.asarray(X), len(X) / 4)
+
+    grades = []
+    for story_i, answer_set in enumerate(answer_sets):
+        max_i = []
+        max_score = None
+        same_score = 0
+        for answer_i, answer in enumerate(answer_set):
+            if answer > max_score:
+                max_score = answer
+                max_i = [answer_i]
+                same_score = 0
+            elif answer == max_score:
+                same_score = same_score + 1
+                max_i.append(answer_i)
+
+        if Y[story_i] in max_i and max_score > 0:
+            grades.append(1.0 / (same_score + 1))
+        else:
+            grades.append(0)
+
+    return grades
+
+
+
+
+def old_grading(X, Y, verbose=False, detailed=False):
     # vector of all question answers [[0.11,0.88,0.12,0.9],[0.2...]]
     answer_sets = np.split(np.asarray(X), len(X) / 4)
     # questions divided by group of score [[(0.97,[0,1]), (0,[2,3])], ..]
