@@ -31,7 +31,7 @@ methods = [
         score=svm.predict,
         opts=dict(
             trainsets=["mc160.train"],
-            testsets=["mc160.dev", "mc500.train", "mc500.dev"]
+            testsets=["mc160.dev", "mc500.dev"]
         )
     ),
     dict(
@@ -39,7 +39,7 @@ methods = [
         score=svm.predict,
         opts=dict(
             trainsets=["mc500.train"],
-            testsets=["mc160.dev", "mc160.train", "mc500.dev"]
+            testsets=["mc160.dev", "mc500.dev"]
         )
     )
 ]
