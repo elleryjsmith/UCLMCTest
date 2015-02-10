@@ -10,8 +10,8 @@ from sklearn.metrics import accuracy_score
 from vectors import results, YVectorQA, YVectorQ
 from grading import grading
 
-# methods = [dict(name="Baseline (BOW)", score=bow.predict, opts=None)]
 
+# methods = [dict(name="Baseline (BOW)", score=bow.predict, opts=None)]
 def train(stories, solutions, opts=None):
     # TODO this should be imported in this way
     # features = [m["score"](stories, opts=m["opts"]) for m in methods]
@@ -33,11 +33,21 @@ def predict(stories, opts=None):
     ))
 
     # TODO this should be loaded not calculated
-    trainset = "mc160.train"
-    train_stories = list(storyparser(trainset))
-    train_solutions = list(answers(trainset))
-    svc = train(train_stories, train_solutions, opts=opts)
-    # END
+    if (not opts):
+        opts = {}
+
+    if ("trainsets" not in opts):
+        opts["trainsets"] = ["mc160.dev"]
+
+    if ("train_stories" not in opts or "train_solutions" not in opts):
+        opts["train_stories"] = list(storyparser(opts["trainsets"]))
+        opts["train_solutions"] = list(answers(opts["trainsets"]))
+
+    svc = train(
+        opts["train_stories"],
+        opts["train_solutions"],
+        opts=opts
+    )
 
     return [x[1] for x in svc.predict_proba(X)]
 
