@@ -20,6 +20,13 @@ methods = [
         )
     ),
     dict(
+        name="Baseline (BOW) all",
+        score=bow.predictAll,
+        opts=dict(
+            testsets=testsets
+        )
+    ),
+    dict(
         name="SVM (BOW) train mc160train",
         score=svm.predict,
         opts=dict(
@@ -53,7 +60,9 @@ for method in methods:
         scores = method["score"](stories, method["opts"])
         grades = grading(scores, true)
         results[name][testset] = sum(grades) / len(grades)
+        print results[name][testset]
 
+print "\n"
 print "| Description | " + " | ".join(testsets) + " |"
 print "| " + ("--- | ---" * len(testsets)) + " |"
 for method in methods:

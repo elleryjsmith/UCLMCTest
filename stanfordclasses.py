@@ -162,9 +162,9 @@ class JParser:
 
 class JSentenceParse(classes.SentenceParse):
 
-    def __init__(self, parser, tree):
+    def __init__(self, parser):
 
-        super(JSentenceParse,self).__init__(tree)
+        super(JSentenceParse,self).__init__()
 
         self.parser = parser
 
@@ -172,65 +172,86 @@ class JSentenceParse(classes.SentenceParse):
     @staticmethod
     def fromtree(parser, tree):
 
-        sp = JSentenceParse(parser,tree)
+        sp = JSentenceParse(parser)
 
-        tkn = sp._lemmatize()
-        sp.tokens = dict([(0,JToken("ROOT",None,None,0))])
+        sp.root,tkn = sp._lemmatize(tree)
+        sp.tokens = dict([(0,sp.root)])
 
+        sp.tokens[0].wordindex = 0
+        j = 1
         for i,t in enumerate(tkn,1):
             t.index = i
             sp.tokens[i] = t
+            if t.isword():
+                t.wordindex = j
+                j += 1
+                
 
         sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
 
-        sp._formdependencies()
+        sp._formdependencies(tree)
 
         return sp
 
 
-    def _lemmatize(self):
+    def _lemmatize(self, tree):
 
-        return self._dfs(self.tree,self._wordlemma)
+        return self._dfs(tree,self._wordlemma)
 
 
     def _wordlemma(self, word, pos):
 
         wt = WordTag(word.value(),pos.value())
-
+                
         return JToken(word.value(),self.parser.morphology.lemmatize(wt).lemma(),pos.value(),0)
 
 
     def _dfs(self, tree, fn):
 
-
+        curr = JToken(None,None,tree.value(),0)
+        
         if tree.isPreTerminal():
 
-            return [fn(tree.children()[0],tree)]
+            ch = fn(tree.children()[0],tree)
+
+            curr.treelink(ch)
+            
+            return curr,[ch]
+
 
         else:
 
             clst = []
 
             for c in tree.children():
+                
+                ch,sub = self._dfs(c,fn)
+                clst.extend(sub + [ch])
+                curr.treelink(ch)
+                
+            return curr,clst
 
-                clst.extend(self._dfs(c,fn))
 
+    def _formdependencies(self, tree):
 
-        return clst
-
-
-    def _formdependencies(self):
-
-        gstruc = self.parser.gramfac.newGrammaticalStructure(self.tree)
+        gstruc = self.parser.gramfac.newGrammaticalStructure(tree)
 
         for rel in gstruc.typedDependenciesCCprocessed():
             
-            gv = self.tokens[rel.gov().index()]
-            dp = self.tokens[rel.dep().index()]
+            gv = self._wpostok(rel.gov().index())
+            dp = self._wpostok(rel.dep().index())
 
             if gv != dp:
-                gv.link(dp,rel.reln().getShortName())
+                gv.deplink(dp,rel.reln().getShortName())
 
+
+    def _wpostok(self, wpos):
+
+        for _,t in self.tokens.items():
+            
+            if not wpos or t.isword() and t.wordindex == wpos:
+                
+                return t
 
     def __repr__(self):
 

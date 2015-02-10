@@ -2,7 +2,7 @@ from __future__ import with_statement
 import cPickle as pickle
 import csv
 import os
-
+from collections import deque
 
 class Story(object):
 
@@ -96,32 +96,41 @@ class Question(object):
 
 class SentenceParse(object):
 
-    def __init__(self, tree):
-        self.tree = tree
+    def __init__(self):
         self.tokens = None
         self.lemma = []
+        self.root = None
 
     @staticmethod
     def fromcache(entry):
-        sp = SentenceParse(entry["tree"])
+        sp = SentenceParse()
         sp.tokens = dict([(i,Token.fromcache(e)) for i,e in entry["tokens"]])
+        sp.tokens[0].wordindex = 0
+        for i,t in enumerate([t for _,t in sp.tokens.items() if t.isword()]):
+            t.wordindex = i
+        sp.root = sp.tokens[0]
         sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
         sp._unpackdeps(entry["dependencies"])
+        sp._unpacktree(entry["tree"])
         return sp
+
+    def words(self):
+
+        return dict([(t.wordindex,t) for _,t in self.tokens.items() if t.isword()])
 
     def _packdeps(self):
         
         return [(g.index,d.index,r) for g,d,r in self.depgraph()]
 
     def _unpackdeps(self, deps):
-
+        
         for g,d,r in deps:
 
-            self.tokens[g].link(self.tokens[d],r)
+            self.tokens[g].deplink(self.tokens[d],r)
 
     def depgraph(self):
 
-        return self._deptrv(self.tokens[0])
+        return self._deptrv(self.root)
 
     def _deptrv(self, node):
 
@@ -129,22 +138,37 @@ class SentenceParse(object):
         
         node.vis ^= 1
         
-        if len(node.dependents):
+        for ch,_ in node.dependents:
             
-            for ch,_ in node.dependents:
-
-                if ch.vis ^ node.vis:
-                    
-                    res.extend(self._deptrv(ch))
+            if ch.vis ^ node.vis:
                 
+                res.extend(self._deptrv(ch))
+
         res.extend([(g,node,r) for g,r in node.governers])
 
         return res
 
+    def parsetree(self, mode="depth"):
+        
+        return self.root.parsetree(mode)
+
+    def _packtree(self):
+
+        return [(p.index,c.index) for l in self.root._parsedfs(self._parserel) for p,c in l]
+
+    def _parserel(self, node):
+
+        return [(p,node) for p in node.parents]
+
+    def _unpacktree(self, nodes):
+
+        for p,c in nodes:
+            
+            self.tokens[p].treelink(self.tokens[c])
 
     def parserepr(self):
         return {
-            "tree": repr(self.tree),
+            "tree": self._packtree(),
             "tokens": [(i,t.parserepr()) for i,t in self.tokens.items()],
             "dependencies": self._packdeps()
         }
@@ -158,11 +182,15 @@ class SentenceParse(object):
 
 class Token(object):
 
+
     def __init__(self, token, lemma, pos, index):
 
         self.token = token
         self.lemma = lemma
         self.pos = pos
+        self.wordindex = -1
+        self.children = []
+        self.parents = []
         self.governers = []
         self.dependents = []
         self.vis = 0
@@ -178,10 +206,59 @@ class Token(object):
         
         return (self.token,self.lemma,self.pos)
 
-    def link(self, dependent, rel):
+    def treelink(self, child):
+        
+        self.children.append(child)
+        child.parents.append(self)
+
+    def deplink(self, dependent, rel):
 
         self.dependents.append((dependent,rel))
         dependent.governers.append((self,rel))
+
+    def isword(self):
+
+        return self.token or False
+
+    def subtree(self, tag, mode="depth"):
+
+        for n in self._parsebfs():
+
+            if not n.token and n.pos == tag and n is not self:
+                
+                return n.parsetree(mode)
+
+    def parsetree(self, mode="depth"):
+        
+        return list(self._parsebfs() if mode == "breadth" else self._parsedfs())
+
+    def _parsebfs(self, fn=lambda x: x):
+
+        yield self
+
+        q = deque([self])
+
+        while q:
+
+            for c in q.popleft().children:
+
+                q.append(c)
+    
+                yield fn(c)
+        
+
+    def _parsedfs(self, fn=lambda x: x):
+        
+        s = [self]
+
+        while s:
+
+            yield fn(s[-1])
+
+            for c in reversed(s.pop().children):
+            
+                s.append(c)
+
 
     def parserepr(self):
 
