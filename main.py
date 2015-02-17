@@ -52,6 +52,14 @@ methods = [
             trainsets=["mc160.train"],
             testsets=["mc160.dev"]
         )
+    ),
+    dict(
+        name="LogReg (BOW+BOWall) mc500train",
+        score=logreg.predict,
+        opts=dict(
+            trainsets=["mc500.train"],
+            testsets=["mc500.dev"]
+        )
     )
 ]
 
