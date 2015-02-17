@@ -1,4 +1,4 @@
-from classes import storyparser, answers
+from classes import storyparser, answers, loadOrPredict
 from grading import grading
 from vectors import results, YVectorQ
 from features import bow
@@ -18,7 +18,8 @@ methods = [
         name="Baseline (BOW)",
         score=bow.predict,
         opts=dict(
-            testsets=testsets
+            testsets=testsets,
+            pickle=True
         )
     ),
     dict(
@@ -27,7 +28,7 @@ methods = [
         opts=dict(
             testsets=testsets
         )
-    )
+    ),
     dict(
         name="SVM (BOW) train mc160train",
         score=svm.predict,
@@ -59,7 +60,7 @@ for method in methods:
         stories = list(storyparser(testset))
         solutions = list(answers(testset))
         true = YVectorQ(stories, solutions)
-        scores = method["score"](stories, method["opts"])
+        scores = loadOrPredict(method, stories, method["opts"], pickle_label=str(testset))
         grades = grading(scores, true)
         results[name][str(testset)] = sum(grades) / len(grades)
         print results[name][str(testset)]

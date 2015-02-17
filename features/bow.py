@@ -5,6 +5,8 @@ from UCLMCTest.grading import grading
 from UCLMCTest.vectors import results, YVectorQA, YVectorQ
 import nltk
 import numpy as np
+import cPickle as pickle
+import os
 
 STOPWORDS = nltk.corpus.stopwords.words('english')
 
