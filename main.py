@@ -3,6 +3,7 @@ from grading import grading
 from vectors import results, YVectorQ
 from features import bow
 import classifier as svm
+import logistic_regression as logreg
 
 testsets = [
     "mc160.dev",
@@ -42,6 +43,14 @@ methods = [
         opts=dict(
             trainsets=["mc500.train"],
             testsets=["mc500.dev"]
+        )
+    ),
+    dict(
+        name="LogReg (BOW+BOWall) mc160train",
+        score=logreg.predict,
+        opts=dict(
+            trainsets=["mc160.train"],
+            testsets=["mc160.dev"]
         )
     )
 ]

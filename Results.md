@@ -14,3 +14,4 @@ $ python main.py
 | Baseline (BOW) w/ stopwords | 0.509722222222 | 0.4775 | 0.563988095238 | 0.531666666667 | 0.547708333333 | 0.523928571429 |
 | SVM (BOW) train mc160train | 0.563194444444 | 0 | 0 | 0 | 0 | 0 |
 | SVM (BOW) train mc500train | 0 | 0.485416666667 | 0 | 0 | 0 | 0 |
+| LogReg (BOW+BOWall) mc160train | 0.577083333333 | 0 | 0 | 0 | 0 | 0 |
