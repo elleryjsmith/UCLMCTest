@@ -15,3 +15,4 @@ $ python main.py
 | SVM (BOW) train mc160train | 0.563194444444 | 0 | 0 | 0 | 0 | 0 |
 | SVM (BOW) train mc500train | 0 | 0.485416666667 | 0 | 0 | 0 | 0 |
 | LogReg (BOW+BOWall) mc160train | 0.577083333333 | 0 | 0 | 0 | 0 | 0 |
+| LogReg (BOW+BOWall) mc500train | 0 | 0.507916666667 | 0 | 0 | 0 | 0 |
