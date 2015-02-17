@@ -28,7 +28,7 @@ methods = [
         opts=dict(
             testsets=testsets
         )
-    )
+    ),
     dict(
         name="SVM (BOW) train mc160train",
         score=svm.predict,
