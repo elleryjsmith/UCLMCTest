@@ -1,8 +1,9 @@
-from classes import storyparser, answers
+from classes import storyparser, answers, loadOrPredict
 from grading import grading
 from vectors import results, YVectorQ
 from features import bow
 import classifier as svm
+import logistic_regression as logreg
 
 testsets = [
     "mc160.dev",
@@ -18,7 +19,8 @@ methods = [
         name="Baseline (BOW)",
         score=bow.predict,
         opts=dict(
-            testsets=testsets
+            testsets=testsets,
+            pickle=True
         )
     ),
     dict(
@@ -63,6 +65,22 @@ methods = [
             testsets=["mc500.dev"],
             features=[bow.predict, bow.predictAll]
         )
+    ),
+    dict(
+        name="LogReg (BOW+BOWall) mc160train",
+        score=logreg.predict,
+        opts=dict(
+            trainsets=["mc160.train"],
+            testsets=["mc160.dev"]
+        )
+    ),
+    dict(
+        name="LogReg (BOW+BOWall) mc500train",
+        score=logreg.predict,
+        opts=dict(
+            trainsets=["mc500.train"],
+            testsets=["mc500.dev"]
+        )
     )
 ]
 
@@ -79,7 +97,7 @@ for method in methods:
         stories = list(storyparser(testset))
         solutions = list(answers(testset))
         true = YVectorQ(stories, solutions)
-        scores = method["score"](stories, method["opts"])
+        scores = loadOrPredict(method, stories, method["opts"], pickle_label=str(testset))
         grades = grading(scores, true)
         results[name][str(testset)] = sum(grades) / len(grades)
         print results[name][str(testset)]
