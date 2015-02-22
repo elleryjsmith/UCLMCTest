@@ -35,7 +35,8 @@ methods = [
         score=svm.predict,
         opts=dict(
             trainsets=["mc160.train"],
-            testsets=["mc160.dev"]
+            testsets=["mc160.dev"],
+            features=[bow.predict]
         )
     ),
     dict(
@@ -43,7 +44,26 @@ methods = [
         score=svm.predict,
         opts=dict(
             trainsets=["mc500.train"],
-            testsets=["mc500.dev"]
+            testsets=["mc500.dev"],
+            features=[bow.predict]
+        )
+    ),
+    dict(
+        name="SVM (BOW+BOWall) train mc160train",
+        score=svm.predict,
+        opts=dict(
+            trainsets=["mc160.train"],
+            testsets=["mc160.dev"],
+            features=[bow.predict, bow.predictAll]
+        )
+    ),
+    dict(
+        name="SVM (BOW+BOWall) train mc500train",
+        score=svm.predict,
+        opts=dict(
+            trainsets=["mc500.train"],
+            testsets=["mc500.dev"],
+            features=[bow.predict, bow.predictAll]
         )
     ),
     dict(

@@ -18,7 +18,7 @@ def train(stories, solutions, opts=None):
     # X = [tuple(t,) for t in np.asarray(features).T]
 
     X = np.array(zip(
-        bow.predict(stories),
+        *[feature(stories) for feature in opts["features"]]
     ))
     y = np.array(YVectorQA(stories, solutions))
     C = 4.0
@@ -29,7 +29,7 @@ def train(stories, solutions, opts=None):
 def predict(stories, opts=None):
 
     X = np.array(zip(
-        bow.predict(stories),
+        *[feature(stories) for feature in opts["features"]]
     ))
 
     # TODO this should be loaded not calculated
