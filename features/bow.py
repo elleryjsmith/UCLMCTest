@@ -52,6 +52,14 @@ def scoreAll(story, question_n, answer_n, bow_filter=None):
     similarities = bow(qa_pair, lemma_story, bow_filter)
     return (len(similarities), similarities)
 
+def scoreComplement(story, question_n, answer_n, bow_filter=None):
+    question = story.questions[question_n]
+    answer = question.answers[answer_n]
+    qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
+    lemma_story = [l for s in story.sentences for l in s.parse.lemma]
+    similarities = bow(qa_pair, lemma_story, bow_filter)
+    return (len(qa_pair) - len(similarities), similarities)
+
 
 # This returns [number of bagofwords] or [normalized bagofwords] or [sigmoid bagofwords]
 def XVectorQA(stories, norm=None, sigmoid_k=50, mode=None, score_f=score, bow_filter=None):
@@ -143,6 +151,10 @@ def predictAll(stories, opts=None):
 
 def predictAllNN(stories, opts=None):
     return XVectorQA(stories, score_f=scoreAll, bow_filter="NN")
+
+
+def predictComplement(stories, opts=None):
+    return XVectorQA(stories, score_f=scoreComplement, bow_filter="NN")
 
 
 def predictAllVB(stories, opts=None):
