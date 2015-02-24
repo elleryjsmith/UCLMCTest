@@ -11,7 +11,11 @@ import os
 STOPWORDS = nltk.corpus.stopwords.words('english')
 
 
-def bow(s1, s2):
+def bow(s1, s2, bow_filter=None):
+    if type:
+        s1 = [t for t in s1 if t[2] == bow_filter]
+        s2 = [t for t in s2 if t[2] == bow_filter]
+
     set1 = {l for w, l, p in s1 if l not in STOPWORDS} \
         | {w for w, l, p in s1 if w not in STOPWORDS}
     set2 = {l for w, l, p in s2 if l not in STOPWORDS} \
@@ -33,30 +37,30 @@ def previous_bow(s1, s2):
     return sim
 
 
-def score(story, question_n, answer_n):
+def score(story, question_n, answer_n, bow_filter=None):
     question = story.questions[question_n]
     answer = question.answers[answer_n]
     qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
-    similarities = [bow(qa_pair, s.parse.lemma) for s in story.sentences]
+    similarities = [bow(qa_pair, s.parse.lemma, bow_filter) for s in story.sentences]
     return (max([len(s) for s in similarities]), similarities)
 
-def scoreAll(story, question_n, answer_n):
+def scoreAll(story, question_n, answer_n, bow_filter=None):
     question = story.questions[question_n]
     answer = question.answers[answer_n]
     qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
     lemma_story = [l for s in story.sentences for l in s.parse.lemma]
-    similarities = bow(qa_pair, lemma_story)
+    similarities = bow(qa_pair, lemma_story, bow_filter)
     return (len(similarities), similarities)
 
 
 # This returns [number of bagofwords] or [normalized bagofwords] or [sigmoid bagofwords]
-def XVectorQA(stories, norm=None, sigmoid_k=50, mode=None, score_f=score):
+def XVectorQA(stories, norm=None, sigmoid_k=50, mode=None, score_f=score, bow_filter=None):
     X = []
     for story in stories:
         for q, question in enumerate(story.questions):
             if mode and question.mode != mode:
                 continue
-            qa_scores = [score_f(story, q, a)[0] for a, _ in enumerate(question.answers)]
+            qa_scores = [score_f(story, q, a, bow_filter)[0] for a, _ in enumerate(question.answers)]
 
             if (norm == "question"):
                 qa_scores = np.array(qa_scores)
@@ -75,13 +79,13 @@ def XVectorQA(stories, norm=None, sigmoid_k=50, mode=None, score_f=score):
 
 
 # This returns [(score, confidence)]
-def XVectorQ(stories, norm=None, sigmoid_k=100, mode=None, score_f=score):
+def XVectorQ(stories, norm=None, sigmoid_k=100, mode=None, score_f=score, bow_filter=None):
     X = []
     for story in stories:
         for q, question in enumerate(story.questions):
             if mode and question.mode != mode:
                 continue
-            qa_scores = [score_f(story, q, a)[0] for a, _ in enumerate(question.answers)]
+            qa_scores = [score_f(story, q, a, bow_filter)[0] for a, _ in enumerate(question.answers)]
 
             if (norm == "question"):
                 qa_scores = np.array(qa_scores)
@@ -135,6 +139,14 @@ def predict(stories, opts=None):
 
 def predictAll(stories, opts=None):
     return XVectorQA(stories, norm="question", score_f=scoreAll)
+
+
+def predictAllNN(stories, opts=None):
+    return XVectorQA(stories, score_f=scoreAll, bow_filter="NN")
+
+
+def predictAllVB(stories, opts=None):
+    return XVectorQA(stories, score_f=scoreAll, bow_filter="VB")
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:

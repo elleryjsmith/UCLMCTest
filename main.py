@@ -16,6 +16,20 @@ testsets = [
 
 methods = [
     dict(
+        name="BOW NN",
+        score=bow.predictAllNN,
+        opts=dict(
+            testsets=testsets
+        )
+    ),
+    dict(
+        name="BOW NP",
+        score=bow.predictAllVB,
+        opts=dict(
+            testsets=testsets
+        )
+    ),
+    dict(
         name="Baseline (BOW)",
         score=bow.predict,
         opts=dict(
