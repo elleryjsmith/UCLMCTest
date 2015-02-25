@@ -7,6 +7,7 @@ $ python main.py
 
 ### 31 Jan 2015
 
+#### Baseline
 | Description | mc160.dev | mc500.dev | mc160.train | mc500.train | ['mc160.dev', 'mc160.train'] | ['mc500.dev', 'mc500.train'] |
 | --- | ------ | ------ | ------ | ------ | ------ | --- |
 | Baseline (BOW) | 0.563194444444 | 0.485416666667 | 0.566369047619 | 0.522777777778 | 0.565416666667 | 0.51744047619 |
@@ -14,10 +15,20 @@ $ python main.py
 | Baseline (BOW) w/ stopwords | 0.509722222222 | 0.4775 | 0.563988095238 | 0.531666666667 | 0.547708333333 | 0.523928571429 |
 | BOW NN | 0.339583333333 | 0.2975 | 0.392261904762 | 0.315138888889 | 0.376458333333 | 0.312619047619 |
 | BOW NP | 0.179166666667 | 0.214583333333 | 0.162202380952 | 0.204027777778 | 0.167291666667 | 0.205535714286 |
-| SVM (BOW) train mc160train | 0.563194444444 | 0 | 0 | 0 | 0 | 0 |
-| SVM (BOW) train mc500train | 0 | 0.485416666667 | 0 | 0 | 0 | 0 |
-| SVM (BOW+BOWall) train mc160train | 0.572916666667 | 0 | 0 | 0 | 0 | 0 |
-| SVM (BOW+BOWall) train mc500train | 0 | 0.507916666667 | 0 | 0 | 0 | 0 |
-| SVM (BOWall+BOWcomplement) train mc160train | 0.528472222222 | 0 | 0 | 0 | 0 | 0 |
-| LogReg (BOW+BOWall) mc160train | 0.577083333333 | 0 | 0 | 0 | 0 | 0 |
-| LogReg (BOW+BOWall) mc500train | 0 | 0.507916666667 | 0 | 0 | 0 | 0 |
+
+#### SVM
+| Description | mc160.dev | mc500.dev | mc160.train | mc500.train | ['mc160.dev', 'mc160.train'] | ['mc500.dev', 'mc500.train'] |
+| --- | ------ | ------ | ------ | ------ | ------ | --- |
+| (BOW) train mc160train | 0.563194444444 | 0 | 0 | 0 | 0 | 0 |
+| (BOW) train mc500train | 0 | 0.485416666667 | 0 | 0 | 0 | 0 |
+| (BOW+BOWall) train mc160train | 0.572916666667 | 0 | 0 | 0 | 0 | 0 |
+| (BOW+BOWall) train mc500train | 0 | 0.507916666667 | 0 | 0 | 0 | 0 |
+| (BOWall+BOWcomplement) train mc160train | 0.528472222222 | 0 | 0 | 0 | 0 | 0 |
+
+#### Logreg
+| Description | mc160.dev | mc500.dev | mc160.train | mc500.train | ['mc160.dev', 'mc160.train'] | ['mc500.dev', 'mc500.train'] |
+| --- | ------ | ------ | ------ | ------ | ------ | --- |
+| (BOW+BOWall) mc160train | 0.577083333333 | 0 | 0 | 0 | 0 | 0 |
+| (BOW+BOWall) mc500train | 0 | 0.507916666667 | 0 | 0 | 0 | 0 |
+| (BOWall+BOWComplement+BOWNN+BOWVB) mc160train | 0.527777777778 | 0 | 0 | 0 | 0 | 0 |
+| (BOWall+BOWComplement+BOWNN+BOWVB) mc500train | 0 | 0.442083333333 | 0 | 0 | 0 | 0 |
