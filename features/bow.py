@@ -60,7 +60,7 @@ def scoreComplement(story, question_n, answer_n, bow_filter=None):
     qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
     lemma_story = [l for s in story.sentences for l in s.parse.lemma]
     similarities = bow(qa_pair, lemma_story, bow_filter=bow_filter)
-    return (len(qa_pair) - len(similarities), similarities)
+    return (len(answer.parse.lemma) - len(similarities), similarities)
 
 
 # This returns [number of bagofwords] or [normalized bagofwords] or [sigmoid bagofwords]
