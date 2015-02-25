@@ -21,9 +21,9 @@ $ python main.py
 | BOW on mc500train | 0 | 0.485416666667 | 0 | 0 | 0 | 0 |
 | BOW+BOWall on mc160train | 0.572916666667 | 0 | 0 | 0 | 0 | 0 |
 | BOW+BOWall on mc500train | 0 | 0.507916666667 | 0 | 0 | 0 | 0 |
-| (BOWall+BOWcomplement) on mc160train | 0.528472222222 | 0 | 0 | 0 | 0 | 0 |
+| BOWall, BOWcomplement on mc160train | 0.528472222222 | 0 | 0 | 0 | 0 | 0 |
 | **Logreg** | | | | | | |
 | BOW+BOWall on mc160train | 0.577083333333 | 0 | 0 | 0 | 0 | 0 |
 | BOW+BOWall on mc500train | 0 | 0.507916666667 | 0 | 0 | 0 | 0 |
-| BOWall+BOWComplement+BOWNN+BOWVB mc160train | 0.527777777778 | 0 | 0 | 0 | 0 | 0 |
-| BOWall+BOWComplement+BOWNN+BOWVB mc500train | 0 | 0.442083333333 | 0 | 0 | 0 | 0 |
+| BOWall, BOWComplement, BOWNN, BOWVB mc160train | 0.527777777778 | 0 | 0 | 0 | 0 | 0 |
+| BOWall, BOWComplement, BOWNN, BOWVB mc500train | 0 | 0.442083333333 | 0 | 0 | 0 | 0 |
