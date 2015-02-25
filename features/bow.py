@@ -70,7 +70,7 @@ def XVectorQA(stories, norm=None, sigmoid_k=50, mode=None, score_f=score, bow_fi
         for q, question in enumerate(story.questions):
             if mode and question.mode != mode:
                 continue
-            
+
             qa_scores = [score_f(story, q, a, bow_filter=bow_filter)[0] for a, _ in enumerate(question.answers)]
 
             if (norm == "question"):
@@ -157,7 +157,7 @@ def predictAllNN(stories, opts=None):
 
 
 def predictComplement(stories, opts=None):
-    return XVectorQA(stories, score_f=scoreComplement, bow_filter="NN")
+    return XVectorQA(stories, score_f=scoreComplement)
 
 
 def predictAllVB(stories, opts=None):
