@@ -174,10 +174,10 @@ class SentenceParse(object):
         }
 
     def __repr__(self):
-        return "SentenceParse(%r)" % (self.tree)
+        return "SentenceParse()"
 
     def __str__(self):
-        return "Parse Tree:\n\n" + str(self.tree) + "\n\nTokens:\n\n" + str(self.tokens) + "\n\n"
+        return "Tokens:\n\n" + str(self.tokens)
 
 
 class Token(object):
@@ -187,7 +187,7 @@ class Token(object):
 
         self.token = token
         self.lemma = lemma
-        self.pos = pos
+        self.pos = pos if pos != "TO" else "IN"
         self.wordindex = -1
         self.children = []
         self.parents = []
@@ -206,6 +206,25 @@ class Token(object):
         
         return (self.token,self.lemma,self.pos)
 
+    def mainpos(self):
+
+        if self.pos[0] == "A":
+            return "R" if self.pos[2] != "J" else "J"
+
+        elif self.pos == "PP":
+            return "I"
+            
+        else:
+            return self.pos[0]
+
+    def leaves(self):
+
+        return set([t for t in self._parsedfs(lambda x: None if x.children else x) if t])
+           
+    def isphrasal(self):
+
+        return self.pos[-1] == "P"
+
     def treelink(self, child):
         
         self.children.append(child)
@@ -220,6 +239,10 @@ class Token(object):
 
         return self.token or False
 
+    def isproper(self):
+
+        return self.pos[:3] == "NNP"
+
     def subtree(self, tag, mode="depth"):
 
         for n in self._parsebfs():
@@ -232,6 +255,23 @@ class Token(object):
         
         return list(self._parsebfs() if mode == "breadth" else self._parsedfs())
 
+    def parentprep(self):
+
+        return [t for t in self.parentphrase("I").subtree("IN") if t.isword()][0]
+
+    def parentphrase(self, pos=None):
+
+        s,pos = self, pos or self.mainpos()
+
+        while s.parents:
+
+            if s.isphrasal() and s.mainpos() == pos:
+
+                return s
+                
+            s = s.parents[0]
+
+            
     def _parsebfs(self, fn=lambda x: x):
 
         yield self
