@@ -3,6 +3,7 @@ import cPickle as pickle
 import csv
 import os
 from collections import deque
+from wordnet import WNToken
 
 class Story(object):
 
@@ -34,12 +35,14 @@ class Sentence(object):
 
     def __init__(self, tokens):
         self.tokens = tokens
+        self.words = None
         self.parse = None
 
     @staticmethod
     def fromcache(entry):
         s = Sentence(entry["tokens"])
         s.parse = SentenceParse.fromcache(entry["parse"])
+        s.words = s.parse.words().values()
         return s
 
     def parserepr(self):
@@ -108,15 +111,16 @@ class SentenceParse(object):
         sp.tokens[0].wordindex = 0
         for i,t in enumerate([t for _,t in sp.tokens.items() if t.isword()]):
             t.wordindex = i
+            t._getsynsets()
         sp.root = sp.tokens[0]
         sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
         sp._unpackdeps(entry["dependencies"])
         sp._unpacktree(entry["tree"])
         return sp
 
-    def words(self):
+    def words(self, punct=False):
 
-        return dict([(t.wordindex,t) for _,t in self.tokens.items() if t.isword()])
+        return dict([(t.wordindex,t) for _,t in self.tokens.items() if t.isword() and (punct or not t.lemma in ".,:;!?\"'")])
 
     def _packdeps(self):
         
@@ -195,13 +199,21 @@ class Token(object):
         self.dependents = []
         self.vis = 0
         self.index = index
-        self.synset = None
+        self.synsets = None
 
     @staticmethod
     def fromcache(entry):
 
         return Token(entry["token"],entry["lemma"],entry["pos"],entry["index"])
 
+    def _getsynsets(self):
+
+        self.synsets = WNToken.synsets(self)
+
+    def synsense(self, sense=1):
+        
+        return [s for s in self.synsets if s.sense() == sense]
+        
     def tagged(self):
         
         return (self.token,self.lemma,self.pos)

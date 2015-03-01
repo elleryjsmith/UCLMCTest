@@ -1,5 +1,4 @@
 from nltk.corpus import wordnet as wn
-from classes import Token
 
 posmap = { "R" : wn.ADV,
            "N" : wn.NOUN,
@@ -61,6 +60,10 @@ class WNToken(object):
                     return d + 1
 
         return 0
+
+    def depthofsyn(self, synset):
+
+        return self.depthof(synset.lexname(),synset.pos())
     
     def lowestdepth(self):
 
@@ -83,6 +86,19 @@ class WNToken(object):
 
         return [self] + [h.tree() for h in self.hypernyms]
 
+    def dfs(self):
+
+        return self._dfs(0)
+
+    def _dfs(self, depth):
+        
+        s = [(self,depth)]
+
+        for h in self.hypernyms:
+            s.extend(h._dfs(depth + 1))
+
+        return s
+
     def _elems(self):
 
         s = {self}
@@ -92,17 +108,29 @@ class WNToken(object):
 
         return s
             
+    def highestcommon(self, other):
+
+        return min(self.pairs(other) or [(None,-1)],key=lambda x:x[1])
+
     def lowestcommon(self, other):
 
-        return min([(a,self.depthof(a.lexname(),pos=a.pos()) + other.depthof(a.lexname(),pos=a.pos())) for a in (self._elems() & other._elems())],key=lambda x:x[1])[0]
+        return max(self.pairs(other) or [(None,-1)],key=lambda x:x[1])
+
+    def pairs(self, other):
+
+        return [(a,self.depthofsyn(a) + other.depthofsyn(a)) for a in (self._elems() & other._elems())]
 
     def lexname(self):
         
-        return self.synset.split(".")[0]
+        return self.synset.split(".")[0].replace("_"," ")
 
     def pos(self):
 
         return self.synset.split(".")[1]
+
+    def sense(self):
+
+        return int(self.synset.split(".")[2])
 
     def __eq__(self, other):
         
