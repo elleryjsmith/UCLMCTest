@@ -3,6 +3,7 @@ import cPickle as pickle
 import csv
 import os
 from collections import deque
+from wordnet import WNToken
 
 class Story(object):
 
@@ -34,12 +35,14 @@ class Sentence(object):
 
     def __init__(self, tokens):
         self.tokens = tokens
+        self.words = None
         self.parse = None
 
     @staticmethod
     def fromcache(entry):
         s = Sentence(entry["tokens"])
         s.parse = SentenceParse.fromcache(entry["parse"])
+        s.words = s.parse.words().values()
         return s
 
     def parserepr(self):
@@ -108,15 +111,16 @@ class SentenceParse(object):
         sp.tokens[0].wordindex = 0
         for i,t in enumerate([t for _,t in sp.tokens.items() if t.isword()]):
             t.wordindex = i
+            t._getsynsets()
         sp.root = sp.tokens[0]
         sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
         sp._unpackdeps(entry["dependencies"])
         sp._unpacktree(entry["tree"])
         return sp
 
-    def words(self):
+    def words(self, punct=False):
 
-        return dict([(t.wordindex,t) for _,t in self.tokens.items() if t.isword()])
+        return dict([(t.wordindex,t) for _,t in self.tokens.items() if t.isword() and (punct or not t.lemma in ".,:;!?\"'")])
 
     def _packdeps(self):
         
@@ -174,10 +178,10 @@ class SentenceParse(object):
         }
 
     def __repr__(self):
-        return "SentenceParse(%r)" % (self.tree)
+        return "SentenceParse()"
 
     def __str__(self):
-        return "Parse Tree:\n\n" + str(self.tree) + "\n\nTokens:\n\n" + str(self.tokens) + "\n\n"
+        return "Tokens:\n\n" + str(self.tokens)
 
 
 class Token(object):
@@ -187,7 +191,7 @@ class Token(object):
 
         self.token = token
         self.lemma = lemma
-        self.pos = pos
+        self.pos = pos if pos != "TO" else "IN"
         self.wordindex = -1
         self.children = []
         self.parents = []
@@ -195,16 +199,43 @@ class Token(object):
         self.dependents = []
         self.vis = 0
         self.index = index
-        self.synset = None
+        self.synsets = None
 
     @staticmethod
     def fromcache(entry):
 
         return Token(entry["token"],entry["lemma"],entry["pos"],entry["index"])
 
+    def _getsynsets(self):
+
+        self.synsets = WNToken.synsets(self)
+
+    def synsense(self, sense=1):
+        
+        return [s for s in self.synsets if s.sense() == sense]
+        
     def tagged(self):
         
         return (self.token,self.lemma,self.pos)
+
+    def mainpos(self):
+
+        if self.pos[0] == "A":
+            return "R" if self.pos[2] != "J" else "J"
+
+        elif self.pos == "PP":
+            return "I"
+            
+        else:
+            return self.pos[0]
+
+    def leaves(self):
+
+        return set([t for t in self._parsedfs(lambda x: None if x.children else x) if t])
+           
+    def isphrasal(self):
+
+        return self.pos[-1] == "P"
 
     def treelink(self, child):
         
@@ -220,6 +251,10 @@ class Token(object):
 
         return self.token or False
 
+    def isproper(self):
+
+        return self.pos[:3] == "NNP"
+
     def subtree(self, tag, mode="depth"):
 
         for n in self._parsebfs():
@@ -232,6 +267,23 @@ class Token(object):
         
         return list(self._parsebfs() if mode == "breadth" else self._parsedfs())
 
+    def parentprep(self):
+
+        return [t for t in self.parentphrase("I").subtree("IN") if t.isword()][0]
+
+    def parentphrase(self, pos=None):
+
+        s,pos = self, pos or self.mainpos()
+
+        while s.parents:
+
+            if s.isphrasal() and s.mainpos() == pos:
+
+                return s
+                
+            s = s.parents[0]
+
+            
     def _parsebfs(self, fn=lambda x: x):
 
         yield self
