@@ -73,6 +73,15 @@ methods = [
         )
     ),
     dict(
+        name="SVM (BOWall+BOWcomplement) train mc160train",
+        score=svm.predict,
+        opts=dict(
+            trainsets=["mc160.train"],
+            testsets=["mc160.dev"],
+            features=[bow.predictComplement, bow.predictAll, bow.predictAllNN, bow.predictAllVB]
+        )
+    ),
+    dict(
         name="SVM (BOW+BOWall) train mc500train",
         score=svm.predict,
         opts=dict(
@@ -93,6 +102,34 @@ methods = [
         name="LogReg (BOW+BOWall) mc500train",
         score=logreg.predict,
         opts=dict(
+            trainsets=["mc500.train"],
+            testsets=["mc500.dev"]
+        )
+    ),
+    dict(
+        name="LogReg (BOWall+BOWComplement+BOWNN+BOWVB) mc160train",
+        score=logreg.predict,
+        opts=dict(
+            features=[
+                bow.predictAll,
+                bow.predictAllNN,
+                bow.predictAllVB,
+                bow.predictComplement
+            ],
+            trainsets=["mc160.train"],
+            testsets=["mc160.dev"]
+        )
+    ),
+    dict(
+        name="LogReg (BOWall+BOWComplement+BOWNN+BOWVB) mc500train",
+        score=logreg.predict,
+        opts=dict(
+            features=[
+                bow.predictAll,
+                bow.predictAllNN,
+                bow.predictAllVB,
+                bow.predictComplement
+            ],
             trainsets=["mc500.train"],
             testsets=["mc500.dev"]
         )
