@@ -7,6 +7,7 @@ import nltk
 import numpy as np
 import cPickle as pickle
 import os
+from UCLMCTest.selection import filtered_story
 
 STOPWORDS = nltk.corpus.stopwords.words('english')
 
@@ -63,15 +64,41 @@ def scoreComplement(story, question_n, answer_n, bow_filter=None):
     return (len(answer.parse.lemma) - len(similarities), similarities)
 
 
+def bow_q_select(story, question_n, sentence_n):
+    question = story.questions[question_n].qsentence.parse.lemma
+    sentence = story.sentences[sentence_n].parse.lemma
+    return bow(question, sentence, bow_filter=None)
+
+
+def bow_qa_select(story, question_n, sentence_n):
+    question = story.questions[question_n].qsentence.parse.lemma
+    answers = [
+        l
+        for a in story.questions[question_n].answers
+        for l in a.parse.lemma
+    ]
+    sentence = story.sentences[sentence_n].parse.lemma
+    return bow(question + answers, sentence, bow_filter=None)
+
+
 # This returns [number of bagofwords] or [normalized bagofwords] or [sigmoid bagofwords]
-def XVectorQA(stories, norm=None, sigmoid_k=50, mode=None, score_f=score, bow_filter=None):
+def XVectorQA(stories, norm=None, sigmoid_k=50,
+              mode=None, score_f=score, bow_filter=None,
+              select_f=None, select_limit=2):
     X = []
     for story in stories:
         for q, question in enumerate(story.questions):
             if mode and question.mode != mode:
                 continue
 
-            qa_scores = [score_f(story, q, a, bow_filter=bow_filter)[0] for a, _ in enumerate(question.answers)]
+            corpus = story
+            if select_f:
+                corpus = filtered_story(
+                    story, q,
+                    limit=select_limit, score_f=select_f
+                )
+
+            qa_scores = [score_f(corpus, q, a, bow_filter=bow_filter)[0] for a, _ in enumerate(question.answers)]
 
             if (norm == "question"):
                 qa_scores = np.array(qa_scores)
@@ -90,13 +117,23 @@ def XVectorQA(stories, norm=None, sigmoid_k=50, mode=None, score_f=score, bow_fi
 
 
 # This returns [(score, confidence)]
-def XVectorQ(stories, norm=None, sigmoid_k=100, mode=None, score_f=score, bow_filter=None):
+def XVectorQ(stories, norm=None, sigmoid_k=100, mode=None,
+             score_f=score, bow_filter=None, select=None,
+             select_f=None, select_limit=2):
     X = []
     for story in stories:
         for q, question in enumerate(story.questions):
             if mode and question.mode != mode:
                 continue
-            qa_scores = [score_f(story, q, a, bow_filter=bow_filter)[0] for a, _ in enumerate(question.answers)]
+
+            corpus = story
+            if select_f:
+                corpus = filtered_story(
+                    story, q,
+                    limit=select_limit, score_f=select_f
+                )
+
+            qa_scores = [score_f(corpus, q, a, bow_filter=bow_filter)[0] for a, _ in enumerate(question.answers)]
 
             if (norm == "question"):
                 qa_scores = np.array(qa_scores)
@@ -145,23 +182,51 @@ def baseline(stories, solutions, mode=None, debug=False):
 
 
 def predict(stories, opts=None):
-    return XVectorQA(stories, norm="question")
+    return XVectorQA(
+        stories,
+        norm="question",
+        select_f=opts["select_f"] if "select_f" in opts else None,
+        select_limit=opts["select_limit"] if "select_limit" in opts else None
+    )
 
 
 def predictAll(stories, opts=None):
-    return XVectorQA(stories, norm="question", score_f=scoreAll)
+    return XVectorQA(
+        stories,
+        norm="question",
+        score_f=scoreAll,
+        select_f=opts["select_f"] if "select_f" in opts else None,
+        select_limit=opts["select_limit"] if "select_limit" in opts else None
+    )
 
 
 def predictAllNN(stories, opts=None):
-    return XVectorQA(stories, score_f=scoreAll, bow_filter="NN")
+    return XVectorQA(
+        stories,
+        score_f=scoreAll,
+        bow_filter="NN",
+        select_f=opts["select_f"] if "select_f" in opts else None,
+        select_limit=opts["select_limit"] if "select_limit" in opts else None
+    )
 
 
 def predictComplement(stories, opts=None):
-    return XVectorQA(stories, score_f=scoreComplement)
+    return XVectorQA(
+        stories,
+        score_f=scoreComplement,
+        select_f=opts["select_f"] if "select_f" in opts else None,
+        select_limit=opts["select_limit"] if "select_limit" in opts else None
+    )
 
 
 def predictAllVB(stories, opts=None):
-    return XVectorQA(stories, score_f=scoreAll, bow_filter="VB")
+    return XVectorQA(
+        stories,
+        score_f=scoreAll,
+        bow_filter="VB",
+        select_f=opts["select_f"] if "select_f" in opts else None,
+        select_limit=opts["select_limit"] if "select_limit" in opts else None
+    )
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
