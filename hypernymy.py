@@ -1,6 +1,7 @@
 from wordnet import WNToken
 from classes import storyparser,answers as ans
 from math import log
+from features.bow import XVectorQA
 from nltk.corpus import stopwords
 from sys import argv,stderr
 
@@ -63,6 +64,10 @@ def hyptreescore(story, q, a, bow_filter):
 
     return treeanswerscore(story,story.questions[q],a,match,wnmatch)
 
+
+def hypbow(stories, opts=None):
+
+    return XVectorQA(stories, norm="question", score_f=hypbowscore)
 
 
 
