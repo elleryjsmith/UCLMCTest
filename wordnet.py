@@ -89,7 +89,7 @@ class WNToken(object):
     def dfs(self):
 
         return self._dfs(0)
-
+        
     def _dfs(self, depth):
         
         s = [(self,depth)]
@@ -134,7 +134,7 @@ class WNToken(object):
 
     def __eq__(self, other):
         
-        return self.synset == other.synset
+        return isinstance(other,self.__class__) and self.synset == other.synset
 
     def __ne__(self, other):
 
