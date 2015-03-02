@@ -8,9 +8,6 @@ from edu.stanford.nlp.ling import WordTag
 from edu.stanford.nlp.trees import TreePrint
 from java.io import StringReader
 
-#sys.path.append("/usr/local/lib/python2.7/site-packages")
-#from nltk.corpus import wordnet
-
 
 class JStory(classes.Story):
 

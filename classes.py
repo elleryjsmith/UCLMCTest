@@ -3,7 +3,10 @@ import cPickle as pickle
 import csv
 import os
 from collections import deque
+from nltk.corpus import stopwords
 from wordnet import WNToken
+
+sw = set(stopwords.words("english"))
 
 class Story(object):
 
@@ -37,12 +40,14 @@ class Sentence(object):
         self.tokens = tokens
         self.words = None
         self.parse = None
+        self.hypernymy = None
 
     @staticmethod
     def fromcache(entry):
         s = Sentence(entry["tokens"])
         s.parse = SentenceParse.fromcache(entry["parse"])
         s.words = s.parse.words().values()
+        s.hypernymy = s._hypernymy()
         return s
 
     def parserepr(self):
@@ -51,6 +56,23 @@ class Sentence(object):
             "tokens": [repr(t) for t in self.tokens],
             "parse": self.parse.parserepr()
         }
+
+    def _hypernymy(self):
+
+        s = dict()
+        weight = lambda x : 1.0 / pow(9,x)
+
+        for w in [w for w in self.words if w.lemma in ({w.lemma for w in self.words} - sw)]:
+
+            s[w.lemma] = 1.0
+        
+            for y in w.synsets:
+                for h,d in y.dfs()[1:]:
+                    if h.lexname() not in s or s[h.lexname()] < weight(d):
+                        s[h.lexname()] = weight(d)
+
+        return s
+
 
     def __repr__(self):
         return "Sentence(%r)" % (self.tokens)
@@ -113,7 +135,7 @@ class SentenceParse(object):
             t.wordindex = i
             t._getsynsets()
         sp.root = sp.tokens[0]
-        sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
+        sp.lemma = [t.tagged() for t in sp.words().values()]
         sp._unpackdeps(entry["dependencies"])
         sp._unpacktree(entry["tree"])
         return sp
@@ -213,7 +235,7 @@ class Token(object):
     def synsense(self, sense=1):
         
         return [s for s in self.synsets if s.sense() == sense]
-        
+
     def tagged(self):
         
         return (self.token,self.lemma,self.pos)
@@ -315,7 +337,7 @@ class Token(object):
     def parserepr(self):
 
         return {"token":self.token,"lemma":self.lemma,"pos":self.pos,"index":self.index}
-
+    
     def __str__(self):
 
         return str(self.tagged())

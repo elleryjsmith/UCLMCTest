@@ -2,6 +2,7 @@ from classes import storyparser, answers, loadOrPredict
 from grading import grading
 from vectors import results, YVectorQ
 from features import bow
+from hypernymy import hypbow
 import classifier as svm
 import logistic_regression as logreg
 
@@ -131,6 +132,13 @@ methods = [
             ],
             trainsets=["mc500.train"],
             testsets=["mc500.dev"]
+        )
+    ),
+    dict(
+        name="Hypernym BOW",
+        score=hypbow,
+        opts=dict(
+            testsets=testsets
         )
     )
 ]
