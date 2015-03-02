@@ -135,7 +135,7 @@ class SentenceParse(object):
             t.wordindex = i
             t._getsynsets()
         sp.root = sp.tokens[0]
-        sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
+        sp.lemma = [t.tagged() for t in sp.words().values()]
         sp._unpackdeps(entry["dependencies"])
         sp._unpacktree(entry["tree"])
         return sp
