@@ -140,6 +140,15 @@ methods = [
         opts=dict(
             testsets=testsets
         )
+    ),
+    dict(
+        name="Baseline (BOW) selection 2",
+        score=bow.predictAll,
+        opts=dict(
+            testsets=testsets,
+            select_f=bow.bow_qa_select,
+            select_limit=2
+        )
     )
 ]
 
