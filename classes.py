@@ -63,7 +63,7 @@ class Sentence(object):
 
         s = dict()
 
-        for c in self.coreference:
+        for c in set(self.coreference):
             s[c] = 1.0
 
         weight = lambda x : 1.0 / pow(10,x)
@@ -78,7 +78,7 @@ class Sentence(object):
 
     def _coreference(self):
 
-        return {c for w in self.parse.words().values() for c in w.coreference() if "'" not in c}
+        return [c for w in self.parse.words().values() for c in w.coreference() if "'" not in c]
 
     def __repr__(self):
         return "Sentence(%r)" % (self.tokens)
