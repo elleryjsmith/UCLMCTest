@@ -67,7 +67,13 @@ def hyptreescore(story, q, a, bow_filter):
 
 def hypbow(stories, opts=None):
 
-    return XVectorQA(stories, norm="question", score_f=hypbowscore)
+    return XVectorQA(
+        stories,
+        norm="question",
+        score_f=hypbowscore,
+        select_f=opts["select_f"] if "select_f" in opts else None,
+        select_limit=opts["select_limit"] if "select_limit" in opts else None
+    )
 
 
 
