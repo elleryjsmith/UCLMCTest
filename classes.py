@@ -41,12 +41,14 @@ class Sentence(object):
         self.words = None
         self.parse = None
         self.hypernymy = None
+        self.coreference = None
 
     @staticmethod
     def fromcache(entry):
         s = Sentence(entry["tokens"])
         s.parse = SentenceParse.fromcache(entry["parse"])
         s.words = s.parse.words().values()
+        s.coreference = s._coreference()
         s.hypernymy = s._hypernymy()
         return s
 
@@ -60,19 +62,23 @@ class Sentence(object):
     def _hypernymy(self):
 
         s = dict()
-        weight = lambda x : 1.0 / pow(9,x)
 
-        for w in [w for w in self.words if w.lemma in ({w.lemma for w in self.words} - sw)]:
+        for c in self.coreference:
+            s[c] = 1.0
 
-            s[w.lemma] = 1.0
+        weight = lambda x : 1.0 / pow(10,x)
         
+        for w in [w for w in self.words if w.lemma in ({w.lemma for w in self.words} - sw)]:        
             for y in w.synsets:
                 for h,d in y.dfs()[1:]:
                     if h.lexname() not in s or s[h.lexname()] < weight(d):
                         s[h.lexname()] = weight(d)
-
+        
         return s
 
+    def _coreference(self):
+
+        return {c for w in self.parse.words().values() for c in w.coreference() if "'" not in c}
 
     def __repr__(self):
         return "Sentence(%r)" % (self.tokens)
@@ -213,6 +219,8 @@ class Token(object):
 
         self.token = token
         self.lemma = lemma
+        self.coref = []
+        self.subcoref = False
         self.pos = pos if pos != "TO" else "IN"
         self.wordindex = -1
         self.children = []
@@ -221,12 +229,14 @@ class Token(object):
         self.dependents = []
         self.vis = 0
         self.index = index
-        self.synsets = None
+        self.synsets = []
 
     @staticmethod
     def fromcache(entry):
 
-        return Token(entry["token"],entry["lemma"],entry["pos"],entry["index"])
+        t = Token(entry["token"],entry["lemma"],entry["pos"],entry["index"])
+        t.coref,t.subcoref = entry["coref"],entry["subcoref"]
+        return t
 
     def _getsynsets(self):
 
@@ -239,6 +249,13 @@ class Token(object):
     def tagged(self):
         
         return (self.token,self.lemma,self.pos)
+
+    def coreference(self):
+        
+        if self.subcoref:
+            return []
+        else:
+            return self.coref or [self.lemma]
 
     def mainpos(self):
 
@@ -257,7 +274,7 @@ class Token(object):
            
     def isphrasal(self):
 
-        return self.pos[-1] == "P"
+        return self.pos[-1] == "P" and len(self.pos) != 3 and self.pos[1] != "R"
 
     def treelink(self, child):
         
@@ -336,7 +353,12 @@ class Token(object):
 
     def parserepr(self):
 
-        return {"token":self.token,"lemma":self.lemma,"pos":self.pos,"index":self.index}
+        return {"token":self.token,
+                "lemma":self.lemma,
+                "pos":self.pos,
+                "index":self.index,
+                "coref":self.coref,
+                "subcoref":self.subcoref}
     
     def __str__(self):
 
