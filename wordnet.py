@@ -43,6 +43,17 @@ class WNToken(object):
 
         return wnt
 
+    @staticmethod
+    def fromcache(entry):
+
+        wnt = WNToken(entry["synset"])
+
+        wnt.lemmas = entry["lemmas"]       
+        wnt.hypernyms = [WNToken.fromcache(h) for h in entry["hypernyms"]]
+
+        return wnt
+
+
     def depthof(self, name, pos="", stanford=False):
 
         if stanford:
@@ -131,6 +142,12 @@ class WNToken(object):
     def sense(self):
 
         return int(self.synset.split(".")[2])
+
+
+    def parserepr(self):
+
+        return {"synset":self.synset,"lemmas":self.lemmas,"hypernyms":[s.parserepr() for s in self.hypernyms]}
+
 
     def __eq__(self, other):
         
