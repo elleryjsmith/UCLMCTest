@@ -23,6 +23,10 @@ def hypernymbow(h1, h2):
     return sum([h1[m] for m in (set(h1.keys()) & set(h2.keys()))])
 
 
+def hypernymbow_list(h1, h2):
+    return [h1[m] for m in (set(h1.keys()) & set(h2.keys()))]
+
+
 def checkanswer(answers, snum, qnum, scores):
     topans = [a for a, s in enumerate(scores) if s == max(scores)]
     if (ord(answers[snum][qnum]) - 0x41) in topans:
@@ -52,16 +56,33 @@ def treeanswerscore(story, question, ansnum, matchscore, wnscore):
     return max(scores)
 
 
-def hypbowscore(story, q, a, bow_filter):
+def hypbowscore(story, q, a, bow_filter=None):
     qn = story.questions[q]
     qa = dict(qn.qsentence.hypernymy.items() + qn.answers[a].hypernymy.items())
 
     return max([(hypernymbow(s.hypernymy, qa), s) for s in story.sentences])
 
 
-def hyptreescore(story, q, a, bow_filter):
+def hyptreescore(story, q, a, bow_filter=None):
 
     return treeanswerscore(story, story.questions[q], a, match, wnmatch)
+
+
+def hyp_q_select(story, question_n, sentence_n):
+    question = story.questions[question_n].qsentence.hypernymy
+    sentence = story.sentences[sentence_n].hypernymy
+    return hypernymbow(question, sentence)
+
+
+def hyp_qa_select(story, question_n, sentence_n):
+    question = story.questions[question_n].qsentence.hypernymy
+    answers = {
+        l[0]: 1
+        for a in story.questions[question_n].answers
+        for l in a.hypernymy.items()
+    }
+    sentence = story.sentences[sentence_n].hypernymy
+    return hypernymbow(dict(question.items() + answers.items()), sentence)
 
 
 def hypbow(stories, opts=None):

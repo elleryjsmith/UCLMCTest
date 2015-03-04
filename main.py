@@ -149,6 +149,15 @@ methods = [
             select_f=bow.bow_qa_select,
             select_limit=2
         )
+    ),
+    dict(
+        name="Hypernym BOW selection 2",
+        score=hypbow,
+        opts=dict(
+            testsets=testsets,
+            select_f=hyp_qa_select,
+            select_limit=2
+        )
     )
 ]
 
