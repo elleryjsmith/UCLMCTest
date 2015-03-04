@@ -12,7 +12,7 @@ def select_sentences(story, question_n, score_f=None, limit=2):
         return story.sentences
 
     selected = [
-        (s, len(score_f(story, question_n, sentence_n)))
+        (s, score_f(story, question_n, sentence_n))
         for sentence_n, s in enumerate(story.sentences)
     ]
     selected = sorted(selected, key=how_many)
