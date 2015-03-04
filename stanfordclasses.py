@@ -1,21 +1,15 @@
 from __future__ import with_statement
 import sys
 import classes
-<<<<<<< HEAD
 from wordnet import WNToken
-=======
->>>>>>> master
 
 from edu.stanford.nlp.process import DocumentPreprocessor, PTBTokenizer, WordTokenFactory, Morphology
 from edu.stanford.nlp.parser.lexparser import LexicalizedParser, Options
 from edu.stanford.nlp.ling import WordTag
 from edu.stanford.nlp.trees import TreePrint
-<<<<<<< HEAD
 from edu.stanford.nlp.pipeline import StanfordCoreNLP, Annotation
 from edu.stanford.nlp.dcoref.CorefCoreAnnotations import CorefChainAnnotation
 from java.util import Properties
-=======
->>>>>>> master
 from java.io import StringReader
 
 
@@ -45,13 +39,8 @@ class JStory(classes.Story):
 
             stry.questions.append(JQuestion.fromdata(qdat[i:i+5],parser))
 
-<<<<<<< HEAD
-        
         stry.parser.coreference(stry)
-            
-=======
 
->>>>>>> master
         return stry
 
 
@@ -93,11 +82,7 @@ class JSentence(classes.Sentence):
         s = JSentence(tkns,parser)
 
         s.parse = s._parse()
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> master
         return s
 
 
@@ -162,13 +147,10 @@ class JParser:
         self.langpack = self.parser.treebankLanguagePack()
         self.gramfac = self.langpack.grammaticalStructureFactory()
 
-<<<<<<< HEAD
         self.properties = Properties()
         self.properties.setProperty("annotators","tokenize, ssplit, pos, lemma, ner, parse, dcoref")
         
         self.cnlp = StanfordCoreNLP(self.properties)
-=======
->>>>>>> master
 
     def apply(self, sentence):
 
@@ -178,7 +160,6 @@ class JParser:
 
         return JSentenceParse.fromtree(self,self.parser.apply(sentence.tokens))
 
-<<<<<<< HEAD
     def coreference(self, story):
         
         text = Annotation(" ".join([str(s) for s in story.sentences]))
@@ -207,8 +188,6 @@ class JParser:
                 except (IndexError, KeyError):
                     break
 
-=======
->>>>>>> master
 
     def __repr__(self):
 
