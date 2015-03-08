@@ -27,7 +27,7 @@ def getmcteststatements(qalist, dataset, storyno, questionno):
   				for index, row in enumerate(mc):
   					if index == storyno:
 						for i, qa in enumerate(qalist):
-							qa.append(row[4+questionno*5+i])
+							qa.append(rules.spellcheck(row[4+questionno*5+i]))
 
 
 
