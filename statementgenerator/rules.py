@@ -22,3 +22,18 @@ def generatewhostatements(qalist, question):
 		concat = a + qf
 		qalist[i].append(concat)
 	return qalist
+
+def generatereplacedfirstprp(qalist, question):
+	nnp1 = None
+	for i in question.qsentence.parse.tokens:
+		if question.qsentence.parse.tokens[i].pos == "NNP" and question.qsentence.parse.tokens[i].token != None:
+			nnp1 = str(question.qsentence.parse.tokens[i].token)
+			break
+	if nnp1 != None:	
+		for i, answer in enumerate(question.answers):
+			if answer.parse.tokens[1].pos == "PRP":
+				a1 = str(answer)
+				a2 = a1.replace(answer.parse.tokens[1].token, nnp1, 1)
+				a3 = a2.replace(" ", "", 1)
+				qalist[i][0] = str(a3)
+	return qalist

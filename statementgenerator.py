@@ -37,8 +37,9 @@ def generatestatements(dataset, storyno, story):
 		qalist = [[],[],[],[]]
 		getmcteststatements(qalist, dataset, storyno, questionno)
 		if str(q).startswith("Q: Who"):
-			rules.generatewhostatements(qalist, q)
-			
+			qalist = rules.generatewhostatements(qalist, q)
+		if str(q).startswith(("Q: What", "Q: Why")):
+			qalist = rules.generatereplacedfirstprp(qalist, q)
 		finallist = []
 		for answers in qalist:
 			finallist.append(lm.lmfilter(lmodel, answers)) 
