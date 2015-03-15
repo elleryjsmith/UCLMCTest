@@ -56,7 +56,7 @@ def treeanswerscore(story, question, ansnum, matchscore, wnscore):
     return max(scores)
 
 
-def hypbowscore(story, q, a, bow_filter=None):
+def hypbowscore(story, q, a, bow_filter=None, bow_f=None):
     qn = story.questions[q]
     qa = dict(qn.qsentence.hypernymy.items() + qn.answers[a].hypernymy.items())
 

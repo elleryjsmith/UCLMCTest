@@ -2,7 +2,7 @@ from classes import storyparser, answers, loadOrPredict
 from grading import grading
 from vectors import results, YVectorQ
 from features import bow
-from hypernymy import hypbow
+from hypernymy import hypbow, hypbowscore, hyp_qa_select
 import classifier as svm
 import logistic_regression as logreg
 
@@ -14,6 +14,55 @@ testsets = [
     ["mc160.dev", "mc160.train"],
     ["mc500.dev", "mc500.train"]
 ]
+
+def _bowcoref(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=bow.score,
+        bow_f=bow.coref_bow
+    )
+def _hypbow(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=hypbowscore
+    )
+def _bowall1(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=bow.scoreAll,
+        select_f=bow.bow_q_select_coref,
+        select_limit=3,
+        bow_f=bow.coref_bow
+    )
+def _bowall2(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=bow.scoreAll,
+        select_f=bow.bow_qa_select_coref,
+        select_limit=3,
+        bow_f=bow.coref_bow
+    )
+def _hypselect(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=hypbowscore,
+        select_f=bow.bow_qa_select_coref,
+        select_limit=3
+    )
+def _hypselect2(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=bow.scoreAll,
+        select_f=hyp_qa_select,
+        select_limit=3,
+        bow_f=bow.coref_bow
+    )
 
 methods = [
     dict(
@@ -34,8 +83,15 @@ methods = [
         name="Baseline (BOW)",
         score=bow.predict,
         opts=dict(
+            testsets=testsets
+        )
+    ),
+    dict(
+        name="BOW coref",
+        score=bow.predictAll,
+        opts=dict(
             testsets=testsets,
-            pickle=True
+            bow_f=bow.coref_bow
         )
     ),
     dict(
@@ -112,12 +168,15 @@ methods = [
         opts=dict(
             features=[
                 bow.predictAll,
-                bow.predictAllNN,
-                bow.predictAllVB,
-                bow.predictComplement
+                # bow.predictAllNN,
+                # bow.predictAllVB,
+                bow.predictComplement,
+                hypbow
             ],
             trainsets=["mc160.train"],
-            testsets=["mc160.dev"]
+            testsets=["mc160.dev"],
+            select_f=bow.bow_qa_select,
+            select_limit=2
         )
     ),
     dict(
@@ -157,6 +216,54 @@ methods = [
             testsets=testsets,
             select_f=hyp_qa_select,
             select_limit=2
+        )
+    ),
+    dict(
+        name="_bowcoref",
+        score=_bowcoref,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_hypbow",
+        score=_hypbow,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_bowall1",
+        score=_bowall1,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_bowall2",
+        score=_bowall2,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_hypselect",
+        score=_hypselect,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_hypselect2",
+        score=_hypselect2,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
         )
     )
 ]
