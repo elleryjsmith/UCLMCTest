@@ -67,7 +67,7 @@ def scoreComplement(story, question_n, answer_n, bow_filter=None):
 def bow_q_select(story, question_n, sentence_n):
     question = story.questions[question_n].qsentence.parse.lemma
     sentence = story.sentences[sentence_n].parse.lemma
-    return bow(question, sentence, bow_filter=None)
+    return len(bow(question, sentence, bow_filter=None))
 
 
 def bow_qa_select(story, question_n, sentence_n):
@@ -78,7 +78,7 @@ def bow_qa_select(story, question_n, sentence_n):
         for l in a.parse.lemma
     ]
     sentence = story.sentences[sentence_n].parse.lemma
-    return bow(question + answers, sentence, bow_filter=None)
+    return len(bow(question + answers, sentence, bow_filter=None))
 
 
 # This returns [number of bagofwords] or [normalized bagofwords] or [sigmoid bagofwords]
