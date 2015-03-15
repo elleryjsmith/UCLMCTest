@@ -28,7 +28,7 @@
 % in the camera-ready version and ask you to change it back.
 
 
-\title{Instructions for ACL-2014 Proceedings}
+\title{Solving MCTest with semantic textual similarity and matching rules??}
 
 \author
        {A. Vlachos, T. Brown, N. Greco, G. Mocanu and E. J. Smith
@@ -43,44 +43,68 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-  This is the abstract
+MCTest is a recently developed test for evaluating Machine Comprehension. Our approach to the task is through textual similarity and shallow methods. We build a simple bag-of-words baseline and we enhance it through additional pre-processing (i.e. coreference resolution, hypernym). We build a set of features and train a logistic classifier that we use to score multiple-choice answers. Finally we show how the introduction of simple matching rules system outperform current results on the MCTest.
 \end{abstract}
 
 \section{Introduction}
+% Emil ? % Tom?
 1 page \cite{mctest} and \newcite{mctest}
 
 \section{Previous work}
+% Nicola X % Tom ? % Emil ?
 1 page
 
 \section{Task description}
+% Tom ? % Emil ?
 1/2 a page--
 
 \section{Baseline}
+% Nicola X % Ellery ?
+Simpler compared to sliding window.
+
+However only textual similarity
+
 half a page
 \section{Preprocessing}
 2 pages
 \subsection{Co-reference}
+% Emil ? % Ellery ?
 \subsection{Hypernym}
+% Ellery ?
 \subsection{Sentence selection}
+% Nicola X
 \subsection{Question answer combiner}
+% Tom?
 
 \section{Strategy}
 1.5 pages
 \subsection{Bag of words}
+% Nicola X % Ellery ?
+several features
+BOWNN
+BOW Complement
+Bow ALL
+
 \subsection{Scoring function}
+% Nicola X
+same problem as Deep Selection
+
 \subsection{Rule based system}
+% Ellery X
 
 \section{Experiments and results}
+% Nicola ? % Emil ? % Tom?
 1 page
 
 \section{Evaluation of strategies}
+% Ellery ?
 3 pages
 
 \section{Future work and conclusion}
+% Ellery ? Tom ? Emil?
 1/2 a page
 
 \section*{Acknowledgments}
-
 Thanks to
 
 % include your own bib file like this:
