@@ -2,9 +2,12 @@ from classes import storyparser, answers, loadOrPredict
 from grading import grading
 from vectors import results, YVectorQ
 from features import bow
+
 from hypernymy import hypbow, hypbowscore, hyp_qa_select
 import classifier as svm
 import logistic_regression as logreg
+import svm_classifier as svmreg
+import numpy as np
 
 testsets = [
     "mc160.dev",
@@ -63,6 +66,32 @@ def _hypselect2(stories, opts=None):
         select_limit=3,
         bow_f=bow.coref_bow
     )
+
+def bigMixSum(stories, opts=None):
+    features = [
+        _bowcoref,
+        _hypbow,
+        _bowall1,
+        # _bowall2,
+        # _hypselect,
+        # _hypselect2
+    ]
+    vectors = [
+        loadOrPredict(
+            dict(name=feature.__name__),
+            stories,
+            opts=dict(pickle=True),
+            pickle_label='mc500.dev'
+        )
+        for feature in features
+    ]
+    print vectors
+
+    sum_v = vectors[0]
+    for v in vectors[1:]:
+        sum_v = np.asarray(sum_v) + np.asarray(v)
+
+    return sum_v
 
 methods = [
     dict(
@@ -264,6 +293,38 @@ methods = [
         opts=dict(
             testsets=testsets,
             pickle=True
+        )
+    ),
+    dict(
+        name="SVM (bigmix) mc160train",
+        score=svmreg.predict,
+        opts=dict(
+            features=[
+                _bowcoref,
+                _hypbow,
+                _bowall1,
+                _bowall2,
+                _hypselect,
+                _hypselect2
+            ],
+            trainsets=["mc160.train"],
+            testsets=["mc160.dev"]
+        )
+    ),
+    dict(
+        name="SVM (bigmix) mc500train",
+        score=svmreg.predict,
+        opts=dict(
+            features=[
+                _bowcoref,
+                _hypbow,
+                _bowall1,
+                _bowall2,
+                _hypselect,
+                _hypselect2
+            ],
+            trainsets=["mc500.train"],
+            testsets=["mc500.dev"]
         )
     )
 ]
