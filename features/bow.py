@@ -12,15 +12,39 @@ from UCLMCTest.selection import filtered_story
 STOPWORDS = nltk.corpus.stopwords.words('english')
 
 
+def coref_bow(s1, s2, bow_filter=None):
+    if bow_filter:
+        s1 = [t for t in s1 if t.pos == bow_filter]
+        s2 = [t for t in s2 if t.pos == bow_filter]
+
+    set1 = []
+    for t in s1:
+        if t.coref != []: [set1.append(c) for c in t.coref]
+        else: set1.append(t.lemma)
+
+    set2 = []
+    for t in s2:
+        if t.coref != []: [set2.append(c) for c in t.coref]
+        else: set2.append(t.lemma)
+
+    # print "\nsentence1:", " ".join([t.token for t in s1]), "\n", set1
+    # print "sentence2:", " ".join([t.token for t in s2]), "\n", set2
+
+    set1 = [w for w in set1 if w not in STOPWORDS]
+    set2 = [w for w in set2 if w not in STOPWORDS]
+
+    return set(set1) & set(set2)
+
+
 def bow(s1, s2, bow_filter=None):
     if bow_filter:
-        s1 = [t for t in s1 if t[2] == bow_filter]
-        s2 = [t for t in s2 if t[2] == bow_filter]
+        s1 = [t for t in s1 if t.pos == bow_filter]
+        s2 = [t for t in s2 if t.pos == bow_filter]
 
-    set1 = {l for w, l, p in s1 if l not in STOPWORDS} \
-        | {w for w, l, p in s1 if w not in STOPWORDS}
-    set2 = {l for w, l, p in s2 if l not in STOPWORDS} \
-        | {w for w, l, p in s2 if w not in STOPWORDS}
+    set1 = {t.lemma for t in s1 if t.lemma not in STOPWORDS} \
+        | {t.token for t in s1 if t.token not in STOPWORDS}
+    set2 = {t.lemma for t in s2 if t.lemma not in STOPWORDS} \
+        | {t.token for t in s2 if t.token not in STOPWORDS}
     return set1 & set2
 
 
@@ -38,53 +62,68 @@ def previous_bow(s1, s2):
     return sim
 
 
-def score(story, question_n, answer_n, bow_filter=None):
+def score(story, question_n, answer_n, bow_filter=None, bow_f=bow):
     question = story.questions[question_n]
     answer = question.answers[answer_n]
-    qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
-    similarities = [bow(qa_pair, s.parse.lemma, bow_filter=bow_filter) for s in story.sentences]
+    qa_pair = question.qsentence.words + answer.words
+    similarities = [bow_f(qa_pair, s.words, bow_filter=bow_filter) for s in story.sentences]
     return (max([len(s) for s in similarities]), similarities)
 
 
-def scoreAll(story, question_n, answer_n, bow_filter=None):
+def scoreAll(story, question_n, answer_n, bow_filter=None, bow_f=bow):
     question = story.questions[question_n]
     answer = question.answers[answer_n]
-    qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
-    lemma_story = [l for s in story.sentences for l in s.parse.lemma]
-    similarities = bow(qa_pair, lemma_story, bow_filter=bow_filter)
+    qa_pair = question.qsentence.words + answer.words
+    lemma_story = [l for s in story.sentences for l in s.words]
+    similarities = bow_f(qa_pair, lemma_story, bow_filter=bow_filter)
     return (len(similarities), similarities)
 
 
-def scoreComplement(story, question_n, answer_n, bow_filter=None):
+def scoreComplement(story, question_n, answer_n, bow_filter=None, bow_f=bow):
     question = story.questions[question_n]
     answer = question.answers[answer_n]
-    qa_pair = question.qsentence.parse.lemma + answer.parse.lemma
-    lemma_story = [l for s in story.sentences for l in s.parse.lemma]
-    similarities = bow(qa_pair, lemma_story, bow_filter=bow_filter)
-    return (len(answer.parse.lemma) - len(similarities), similarities)
+    qa_pair = question.qsentence.words + answer.words
+    lemma_story = [l for s in story.sentences for l in s.words]
+    similarities = bow_f(qa_pair, lemma_story, bow_filter=bow_filter)
+    return (len(answer.words) - len(similarities), similarities)
 
 
-def bow_q_select(story, question_n, sentence_n):
-    question = story.questions[question_n].qsentence.parse.lemma
-    sentence = story.sentences[sentence_n].parse.lemma
-    return len(bow(question, sentence, bow_filter=None))
+def bow_q_select(story, question_n, sentence_n, bow_f=bow):
+    question = story.questions[question_n].qsentence.words
+    sentence = story.sentences[sentence_n].words
+    return len(bow_f(question, sentence, bow_filter=None))
 
 
-def bow_qa_select(story, question_n, sentence_n):
-    question = story.questions[question_n].qsentence.parse.lemma
+def bow_qa_select(story, question_n, sentence_n, bow_f=bow):
+    question = story.questions[question_n].qsentence.words
     answers = [
         l
         for a in story.questions[question_n].answers
-        for l in a.parse.lemma
+        for l in a.words
     ]
-    sentence = story.sentences[sentence_n].parse.lemma
-    return len(bow(question + answers, sentence, bow_filter=None))
+    sentence = story.sentences[sentence_n].words
+    return len(bow_f(question + answers, sentence, bow_filter=None))
 
+
+def bow_qa_select_coref(story, question_n, sentence_n, bow_f=coref_bow):
+    question = story.questions[question_n].qsentence.words
+    answers = [
+        l
+        for a in story.questions[question_n].answers
+        for l in a.words
+    ]
+    sentence = story.sentences[sentence_n].words
+    return len(bow_f(question + answers, sentence, bow_filter=None))
+
+def bow_q_select_coref(story, question_n, sentence_n, bow_f=coref_bow):
+    question = story.questions[question_n].qsentence.words
+    sentence = story.sentences[sentence_n].words
+    return len(bow_f(question, sentence, bow_filter=None))
 
 # This returns [number of bagofwords] or [normalized bagofwords] or [sigmoid bagofwords]
 def XVectorQA(stories, norm=None, sigmoid_k=50,
               mode=None, score_f=score, bow_filter=None,
-              select_f=None, select_limit=2):
+              select_f=None, select_limit=2, bow_f=bow):
     X = []
     for story in stories:
         for q, question in enumerate(story.questions):
@@ -98,7 +137,7 @@ def XVectorQA(stories, norm=None, sigmoid_k=50,
                     limit=select_limit, score_f=select_f
                 )
 
-            qa_scores = [score_f(corpus, q, a, bow_filter=bow_filter)[0] for a, _ in enumerate(question.answers)]
+            qa_scores = [score_f(corpus, q, a, bow_filter=bow_filter, bow_f=bow_f)[0] for a, _ in enumerate(question.answers)]
 
             if (norm == "question"):
                 qa_scores = np.array(qa_scores)
@@ -119,7 +158,7 @@ def XVectorQA(stories, norm=None, sigmoid_k=50,
 # This returns [(score, confidence)]
 def XVectorQ(stories, norm=None, sigmoid_k=100, mode=None,
              score_f=score, bow_filter=None, select=None,
-             select_f=None, select_limit=2):
+             select_f=None, select_limit=2, bow_f=bow):
     X = []
     for story in stories:
         for q, question in enumerate(story.questions):
@@ -133,7 +172,7 @@ def XVectorQ(stories, norm=None, sigmoid_k=100, mode=None,
                     limit=select_limit, score_f=select_f
                 )
 
-            qa_scores = [score_f(corpus, q, a, bow_filter=bow_filter)[0] for a, _ in enumerate(question.answers)]
+            qa_scores = [score_f(corpus, q, a, bow_filter=bow_filter, bow_f=bow_f)[0] for a, _ in enumerate(question.answers)]
 
             if (norm == "question"):
                 qa_scores = np.array(qa_scores)
@@ -186,7 +225,8 @@ def predict(stories, opts=None):
         stories,
         norm="question",
         select_f=opts["select_f"] if "select_f" in opts else None,
-        select_limit=opts["select_limit"] if "select_limit" in opts else None
+        select_limit=opts["select_limit"] if "select_limit" in opts else None,
+        bow_f=opts["bow_f"] if "bow_f" in opts else bow
     )
 
 
@@ -196,7 +236,8 @@ def predictAll(stories, opts=None):
         norm="question",
         score_f=scoreAll,
         select_f=opts["select_f"] if "select_f" in opts else None,
-        select_limit=opts["select_limit"] if "select_limit" in opts else None
+        select_limit=opts["select_limit"] if "select_limit" in opts else None,
+        bow_f=opts["bow_f"] if "bow_f" in opts else bow
     )
 
 
@@ -206,7 +247,8 @@ def predictAllNN(stories, opts=None):
         score_f=scoreAll,
         bow_filter="NN",
         select_f=opts["select_f"] if "select_f" in opts else None,
-        select_limit=opts["select_limit"] if "select_limit" in opts else None
+        select_limit=opts["select_limit"] if "select_limit" in opts else None,
+        bow_f=opts["bow_f"] if "bow_f" in opts else bow
     )
 
 
@@ -215,7 +257,8 @@ def predictComplement(stories, opts=None):
         stories,
         score_f=scoreComplement,
         select_f=opts["select_f"] if "select_f" in opts else None,
-        select_limit=opts["select_limit"] if "select_limit" in opts else None
+        select_limit=opts["select_limit"] if "select_limit" in opts else None,
+        bow_f=opts["bow_f"] if "bow_f" in opts else bow
     )
 
 
@@ -225,7 +268,8 @@ def predictAllVB(stories, opts=None):
         score_f=scoreAll,
         bow_filter="VB",
         select_f=opts["select_f"] if "select_f" in opts else None,
-        select_limit=opts["select_limit"] if "select_limit" in opts else None
+        select_limit=opts["select_limit"] if "select_limit" in opts else None,
+        bow_f=opts["bow_f"] if "bow_f" in opts else bow
     )
 
 if __name__ == "__main__":

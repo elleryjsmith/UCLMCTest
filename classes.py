@@ -396,6 +396,8 @@ def storyparser(datasets):
 
 def loadOrPredict(method, stories, opts, pickle_label=None):
     if "pickle" in opts and pickle_label:
+        if type(pickle_label) is list and len(pickle_label) == 1:
+            pickle_label = pickle_label[0]
         pickle_name = method["name"] + "_" + str(pickle_label)
         fpath = os.path.abspath(os.path.dirname(__file__) + "/pickles/" + pickle_name + ".pickle")
         try:

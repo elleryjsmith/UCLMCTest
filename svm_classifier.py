@@ -21,9 +21,9 @@ def train(stories, solutions, opts=None):
         *[loadOrPredict(dict(name=feature.__name__), stories, opts=dict(pickle=True), pickle_label=opts['trainsets']) for feature in opts["features"]]
     ))
     y = np.array(YVectorQA(stories, solutions))
-    C = 1e5
+    C = 2
 
-    return linear_model.LogisticRegression(C=C).fit(X, y)
+    return svm.SVC(kernel='linear', C=C, probability=True).fit(X, y)
 
 
 def predict(stories, opts=None):

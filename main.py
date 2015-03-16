@@ -2,9 +2,12 @@ from classes import storyparser, answers, loadOrPredict
 from grading import grading
 from vectors import results, YVectorQ
 from features import bow
-from hypernymy import hypbow
+
+from hypernymy import hypbow, hypbowscore, hyp_qa_select
 import classifier as svm
 import logistic_regression as logreg
+import svm_classifier as svmreg
+import numpy as np
 
 testsets = [
     "mc160.dev",
@@ -12,8 +15,85 @@ testsets = [
     "mc160.train",
     "mc500.train",
     ["mc160.dev", "mc160.train"],
-    ["mc500.dev", "mc500.train"]
+    ["mc500.dev", "mc500.train"],
+    "mc160.test",
+    "mc500.test"
 ]
+
+def _bowcoref(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=bow.score,
+        bow_f=bow.coref_bow
+    )
+def _hypbow(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=hypbowscore
+    )
+def _bowall1(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=bow.scoreAll,
+        select_f=bow.bow_q_select_coref,
+        select_limit=3,
+        bow_f=bow.coref_bow
+    )
+def _bowall2(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=bow.scoreAll,
+        select_f=bow.bow_qa_select_coref,
+        select_limit=3,
+        bow_f=bow.coref_bow
+    )
+def _hypselect(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=hypbowscore,
+        select_f=bow.bow_qa_select_coref,
+        select_limit=3
+    )
+def _hypselect2(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=bow.scoreAll,
+        select_f=hyp_qa_select,
+        select_limit=3,
+        bow_f=bow.coref_bow
+    )
+
+def bigMixSum(stories, opts=None):
+    features = [
+        _bowcoref,
+        _hypbow,
+        _bowall1,
+        # _bowall2,
+        # _hypselect,
+        # _hypselect2
+    ]
+    vectors = [
+        loadOrPredict(
+            dict(name=feature.__name__),
+            stories,
+            opts=dict(pickle=True),
+            pickle_label='mc500.dev'
+        )
+        for feature in features
+    ]
+    print vectors
+
+    sum_v = vectors[0]
+    for v in vectors[1:]:
+        sum_v = np.asarray(sum_v) + np.asarray(v)
+
+    return sum_v
 
 methods = [
     dict(
@@ -34,8 +114,15 @@ methods = [
         name="Baseline (BOW)",
         score=bow.predict,
         opts=dict(
+            testsets=testsets
+        )
+    ),
+    dict(
+        name="BOW coref",
+        score=bow.predictAll,
+        opts=dict(
             testsets=testsets,
-            pickle=True
+            bow_f=bow.coref_bow
         )
     ),
     dict(
@@ -112,12 +199,15 @@ methods = [
         opts=dict(
             features=[
                 bow.predictAll,
-                bow.predictAllNN,
-                bow.predictAllVB,
-                bow.predictComplement
+                # bow.predictAllNN,
+                # bow.predictAllVB,
+                bow.predictComplement,
+                hypbow
             ],
             trainsets=["mc160.train"],
-            testsets=["mc160.dev"]
+            testsets=["mc160.dev"],
+            select_f=bow.bow_qa_select,
+            select_limit=2
         )
     ),
     dict(
@@ -157,6 +247,118 @@ methods = [
             testsets=testsets,
             select_f=hyp_qa_select,
             select_limit=2
+        )
+    ),
+    dict(
+        name="_bowcoref",
+        score=_bowcoref,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_hypbow",
+        score=_hypbow,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_bowall1",
+        score=_bowall1,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_bowall2",
+        score=_bowall2,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_hypselect",
+        score=_hypselect,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="_hypselect2",
+        score=_hypselect2,
+        opts=dict(
+            testsets=testsets,
+            pickle=True
+        )
+    ),
+    dict(
+        name="SVM (bigmix) mc160train",
+        score=svmreg.predict,
+        opts=dict(
+            features=[
+                _bowcoref,
+                _hypbow,
+                _bowall1,
+                _bowall2,
+                _hypselect,
+                _hypselect2
+            ],
+            trainsets=["mc160.train"],
+            testsets=["mc160.dev"]
+        )
+    ),
+    dict(
+        name="SVM (bigmix) mc500train",
+        score=svmreg.predict,
+        opts=dict(
+            features=[
+                _bowcoref,
+                _hypbow,
+                _bowall1,
+                _bowall2,
+                _hypselect,
+                _hypselect2
+            ],
+            trainsets=["mc500.train"],
+            testsets=["mc500.dev"]
+        )
+    ),
+    dict(
+        name="SVM (bigmix) mc160train",
+        score=svmreg.predict,
+        opts=dict(
+            features=[
+                _bowcoref,
+                _hypbow,
+                _bowall1,
+                _bowall2,
+                _hypselect,
+                _hypselect2
+            ],
+            trainsets=["mc160.train"],
+            testsets=["mc160.test"]
+        )
+    ),
+    dict(
+        name="SVM (bigmix) mc500train",
+        score=svmreg.predict,
+        opts=dict(
+            features=[
+                _bowcoref,
+                _hypbow,
+                _bowall1,
+                _bowall2,
+                _hypselect,
+                _hypselect2
+            ],
+            trainsets=["mc500.train"],
+            testsets=["mc500.test"]
         )
     )
 ]
