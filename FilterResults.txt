@@ -1,0 +1,22 @@
+### mc160.test: 71.354167%
+Questions filtered by whyquestion: 37 (15.416667%)
+Performance of whystory: 67.567568%
+Performance of baseline160: 64.864865%
+Improvement: 2.702703%
+Questions filtered by simplenegative: 1 (0.416667%)
+Performance of simplenegate: 100.000000%
+Performance of baseline160: 0.000000%
+Improvement: 100.000000%
+Questions filtered by tempquestion: 9 (3.750000%)
+Performance of tempstory: 66.666667%
+Performance of baseline160: 55.555556%
+Improvement: 11.111111%
+### mc500.test: 57.000000%
+Questions filtered by whyquestion: 64 (10.666667%)
+Performance of whystory: 71.875000%
+Performance of baseline500: 68.750000%
+Improvement: 3.125000%
+Questions filtered by simplenegative: 2 (0.333333%)
+Performance of simplenegate: 100.000000%
+Performance of baseline500: 0.000000%
+Improvement: 100.000000%
