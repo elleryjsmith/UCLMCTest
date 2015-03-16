@@ -15,7 +15,9 @@ testsets = [
     "mc160.train",
     "mc500.train",
     ["mc160.dev", "mc160.train"],
-    ["mc500.dev", "mc500.train"]
+    ["mc500.dev", "mc500.train"],
+    "mc160.test",
+    "mc500.test"
 ]
 
 def _bowcoref(stories, opts=None):
@@ -325,6 +327,38 @@ methods = [
             ],
             trainsets=["mc500.train"],
             testsets=["mc500.dev"]
+        )
+    ),
+    dict(
+        name="SVM (bigmix) mc160train",
+        score=svmreg.predict,
+        opts=dict(
+            features=[
+                _bowcoref,
+                _hypbow,
+                _bowall1,
+                _bowall2,
+                _hypselect,
+                _hypselect2
+            ],
+            trainsets=["mc160.train"],
+            testsets=["mc160.test"]
+        )
+    ),
+    dict(
+        name="SVM (bigmix) mc500train",
+        score=svmreg.predict,
+        opts=dict(
+            features=[
+                _bowcoref,
+                _hypbow,
+                _bowall1,
+                _bowall2,
+                _hypselect,
+                _hypselect2
+            ],
+            trainsets=["mc500.train"],
+            testsets=["mc500.test"]
         )
     )
 ]
