@@ -1,9 +1,12 @@
 from nltk.corpus import wordnet as wn
+from nltk.stem import WordNetLemmatizer
 
 posmap = { "R" : wn.ADV,
            "N" : wn.NOUN,
            "J" : wn.ADJ,
            "V" : wn.VERB }
+
+lemmatizer = WordNetLemmatizer()
 
 def wnpos(stanfordpos):
     
@@ -11,6 +14,13 @@ def wnpos(stanfordpos):
         return posmap[stanfordpos]
     else:
         return ""
+
+def getlemma(word, stanfordpos):
+
+    if not wnpos(stanfordpos):
+        return word
+
+    return lemmatizer.lemmatize(word,wnpos(stanfordpos))
 
 class WNToken(object):
 

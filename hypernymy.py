@@ -27,14 +27,6 @@ def hypernymbow_list(h1, h2):
     return [h1[m] for m in (set(h1.keys()) & set(h2.keys()))]
 
 
-def checkanswer(answers, snum, qnum, scores):
-    topans = [a for a, s in enumerate(scores) if s == max(scores)]
-    if (ord(answers[snum][qnum]) - 0x41) in topans:
-        return 1.0 / len(topans)
-    else:
-        return 0.0
-
-
 def treeanswerscore(story, question, ansnum, matchscore, wnscore):
     q = question.answers[ansnum].words + question.qsentence.words
     scores = []
@@ -56,7 +48,7 @@ def treeanswerscore(story, question, ansnum, matchscore, wnscore):
     return max(scores)
 
 
-def hypbowscore(story, q, a, bow_filter=None, bow_f=None):
+def hypbowscore(story, q, a, bow_filter=None):
     qn = story.questions[q]
     qa = dict(qn.qsentence.hypernymy.items() + qn.answers[a].hypernymy.items())
 

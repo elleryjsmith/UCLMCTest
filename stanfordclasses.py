@@ -27,11 +27,9 @@ class JStory(classes.Story):
 
         stry = JStory([],[],parser)
 
-
-        txt = data[2].replace("\\newline"," ")
+        txt = data[2].replace("\\newline"," ").replace("\\tab"," ")
 
         stry.sentences = stry._extractsentences(txt)
-
 
         qdat = data[3:]
 
@@ -40,6 +38,8 @@ class JStory(classes.Story):
             stry.questions.append(JQuestion.fromdata(qdat[i:i+5],parser))
 
         stry.parser.coreference(stry)
+        
+        stry._setfrequencies()
 
         return stry
 
@@ -61,8 +61,15 @@ class JStory(classes.Story):
 
             snts.append(s)
 
-
         return snts
+
+    def _setfrequencies(self):
+        
+        for s in self.sentences:
+            
+            for t in s.parse.words().values():
+
+                t._tokencount(self)
 
 
 class JSentence(classes.Sentence):
@@ -120,9 +127,8 @@ class JQuestion(classes.Question):
 
 
         for ans in data[1:]:
-
-            qn.answers.append(JSentence.fromstring(ans,parser))
-
+            
+            qn.answers.append(JSentence.fromstring(ans.replace("do "," do "),parser))
 
         return qn
 
@@ -216,7 +222,7 @@ class JSentenceParse(classes.SentenceParse):
         for i,t in enumerate(tkn,1):
             t.index = i
             sp.tokens[i] = t
-            if t.isword():
+            if t.isword(p=True):
                 t.wordindex = j
                 j += 1
                 
@@ -283,7 +289,7 @@ class JSentenceParse(classes.SentenceParse):
 
         for _,t in self.tokens.items():
             
-            if not wpos or t.isword() and t.wordindex == wpos:
+            if not wpos or t.isword(p=True) and t.wordindex == wpos:
                 
                 return t
 
@@ -293,6 +299,15 @@ class JSentenceParse(classes.SentenceParse):
 
 
 class JToken(classes.Token):
+
+    def _tokencount(self, story):
+
+        for s in story.sentences:
+
+            for t in s.parse.words().values():
+                
+                if t.lemma == self.lemma:
+                    self.frequency += 1
 
     def __repr__(self):
 

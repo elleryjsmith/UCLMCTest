@@ -2,9 +2,9 @@ from __future__ import with_statement
 import cPickle as pickle
 import csv
 import os
-from collections import deque
+from collections import deque, OrderedDict as odict
 from nltk.corpus import stopwords
-from wordnet import WNToken
+from wordnet import WNToken, getlemma
 
 sw = set(stopwords.words("english"))
 
@@ -42,6 +42,7 @@ class Sentence(object):
         self.parse = None
         self.hypernymy = None
         self.coreference = None
+        self.wbow = None
 
     @staticmethod
     def fromcache(entry):
@@ -78,7 +79,8 @@ class Sentence(object):
 
     def _coreference(self):
 
-        return [c for w in self.parse.words().values() for c in w.coreference() if "'" not in c]
+        return [c.lower() for w in self.parse.words().values()
+                for c in w.coreference() if "'" not in c]
 
     def __repr__(self):
         return "Sentence(%r)" % (self.tokens)
@@ -148,7 +150,11 @@ class SentenceParse(object):
 
     def words(self, punct=False):
 
-        return dict([(t.wordindex,t) for _,t in self.tokens.items() if t.isword() and (punct or not t.lemma in ".,:;!?\"'")])
+        return odict([(t.wordindex,t) for _,t in self.tokens.items() if t.isword(p=punct)])
+
+    def headword(self):
+
+        return self.root.dependents[0][0]
 
     def _packdeps(self):
         
@@ -218,10 +224,10 @@ class Token(object):
     def __init__(self, token, lemma, pos, index):
 
         self.token = token
-        self.lemma = lemma
+        self.lemma = lemma.lower() if lemma else None
         self.coref = []
         self.subcoref = False
-        self.pos = pos if pos != "TO" else "IN"
+        self.pos = pos if self.lemma != "to" else "TO"
         self.wordindex = -1
         self.children = []
         self.parents = []
@@ -229,13 +235,15 @@ class Token(object):
         self.dependents = []
         self.vis = 0
         self.index = index
+        self.frequency = 0
         self.synsets = []
 
     @staticmethod
     def fromcache(entry):
 
         t = Token(entry["token"],entry["lemma"],entry["pos"],entry["index"])
-        t.coref,t.subcoref = entry["coref"],entry["subcoref"]
+        t.coref,t.subcoref = [e.lower() for e in entry["coref"]],entry["subcoref"]
+        t.frequency = entry["frequency"]
         return t
 
     def _getsynsets(self):
@@ -253,9 +261,9 @@ class Token(object):
     def coreference(self):
         
         if self.subcoref:
-            return []
+            return [self.lemma]
         else:
-            return self.coref or [self.lemma]
+            return [getlemma(w,self.pos) for w in self.coref] or [self.lemma]
 
     def mainpos(self):
 
@@ -274,7 +282,19 @@ class Token(object):
            
     def isphrasal(self):
 
-        return self.pos[-1] == "P" and len(self.pos) != 3 and self.pos[1] != "R"
+        return ((self.pos[-1] == "P"
+                 and self.pos[1] != "R")
+                and len(self.pos) != 3)
+
+    def isclausal(self):
+        
+        return self.pos[:1] == "S" and self.pos != "SYM" and self.pos[-1:] != "Q"
+
+    def issbarhead(self):
+
+        if self.parents:
+            if self.parents[0].parents:
+                return self.parents[0].parents[0].pos == "SBAR"
 
     def treelink(self, child):
         
@@ -286,13 +306,33 @@ class Token(object):
         self.dependents.append((dependent,rel))
         dependent.governers.append((self,rel))
 
-    def isword(self):
+    def isword(self, p=False):
 
-        return self.token or False
+        return self.token and (p or self.pos not in ".,:;!?\"\"''``")
 
     def isproper(self):
 
         return self.pos[:3] == "NNP"
+    
+    def isnomial(self):
+
+        return self.pos == "NN" or self.pos == "NNS"
+
+    def ispronomial(self):
+        
+        return self.pos[:2] == "PR" or self.pos[:2] == "PP"
+
+    def isverbal(self):
+
+        return self.pos[:1] == "V" and self.pos != "VP"
+    
+    def isadjevctival(self):
+
+        return self.pos[:1] == "J"
+
+    def isadverbial(self):
+
+        return self.pos[:1] == "R" and self.pos != "RP"
 
     def subtree(self, tag, mode="depth"):
 
@@ -301,6 +341,10 @@ class Token(object):
             if not n.token and n.pos == tag and n is not self:
                 
                 return n.parsetree(mode)
+
+    def leaves(self):
+
+        return [t for t in self.parsetree() if t.isword()]
 
     def parsetree(self, mode="depth"):
         
@@ -312,17 +356,31 @@ class Token(object):
 
     def parentphrase(self, pos=None):
 
-        s,pos = self, pos or self.mainpos()
+        s = self
 
-        while s.parents:
+        if not s.isphrasal():
 
-            if s.isphrasal() and s.mainpos() == pos:
+            while s.parents:
 
-                return s
+                if s.isphrasal() and (not pos or s.mainpos() == pos):
+
+                    return s
                 
+                s = s.parents[0]
+
+    def parentclause(self):
+        s = self
+        while s.parents:
+            if s.isclausal():
+                return s                
             s = s.parents[0]
 
-            
+    def root(self):
+        r = self
+        while r.parents:
+            r = r.parents[0]
+        return r
+
     def _parsebfs(self, fn=lambda x: x):
 
         yield self
@@ -358,7 +416,8 @@ class Token(object):
                 "pos":self.pos,
                 "index":self.index,
                 "coref":self.coref,
-                "subcoref":self.subcoref}
+                "subcoref":self.subcoref,
+                "frequency":self.frequency}
     
     def __str__(self):
 
@@ -367,7 +426,6 @@ class Token(object):
     def __repr__(self):
 
         return "Token(%r,%r,%r,%r)" % (self.token,self.lemma,self.pos,self.index)
-
 
 def answers(datasets):
     if type(datasets) != list:
@@ -396,8 +454,6 @@ def storyparser(datasets):
 
 def loadOrPredict(method, stories, opts, pickle_label=None):
     if "pickle" in opts and pickle_label:
-        if type(pickle_label) is list and len(pickle_label) == 1:
-            pickle_label = pickle_label[0]
         pickle_name = method["name"] + "_" + str(pickle_label)
         fpath = os.path.abspath(os.path.dirname(__file__) + "/pickles/" + pickle_name + ".pickle")
         try:
