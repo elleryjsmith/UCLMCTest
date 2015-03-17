@@ -2,7 +2,7 @@ from classes import storyparser, answers, loadOrPredict
 from grading import grading
 from vectors import results, YVectorQ
 from features import bow
-
+from fscoring import fscore160, fscore500
 from hypernymy import hypbow, hypbowscore, hyp_qa_select
 import classifier as svm
 import logistic_regression as logreg
@@ -67,6 +67,21 @@ def _hypselect2(stories, opts=None):
         select_f=hyp_qa_select,
         select_limit=3,
         bow_f=bow.coref_bow
+    )
+
+def _filter160(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=fscore160,
+    )
+
+
+def _filter500(stories, opts=None):
+    return bow.XVectorQA(
+        stories,
+        norm="question",
+        score_f=fscore500,
     )
 
 def bigMixSum(stories, opts=None):
