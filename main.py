@@ -10,12 +10,12 @@ import svm_classifier as svmreg
 import numpy as np
 
 testsets = [
-    "mc160.dev",
-    "mc500.dev",
-    "mc160.train",
-    "mc500.train",
-    ["mc160.dev", "mc160.train"],
-    ["mc500.dev", "mc500.train"],
+    # "mc160.dev",
+    # "mc500.dev",
+    # "mc160.train",
+    # "mc500.train",
+    # ["mc160.dev", "mc160.train"],
+    # ["mc500.dev", "mc500.train"],
     "mc160.test",
     "mc500.test"
 ]
@@ -111,6 +111,13 @@ def bigMixSum(stories, opts=None):
     return sum_v
 
 methods = [
+    dict(
+        name="_filter500",
+        score=_filter500,
+        opts=dict(
+            testsets=["mc500.test"],
+        )
+    ),
     # dict(
     #     name="BOW NN",
     #     score=bow.predictAllNN,
@@ -344,38 +351,40 @@ methods = [
     #         testsets=["mc500.dev"]
     #     )
     # ),
-    dict(
-        name="SVM (bigmix) mc160train",
-        score=svmreg.predict,
-        opts=dict(
-            features=[
-                _bowcoref,
-                _hypbow,
-                _bowall1,
-                _bowall2,
-                _hypselect,
-                _hypselect2
-            ],
-            trainsets=["mc160.train"],
-            testsets=["mc160.test"]
-        )
-    ),
-    dict(
-        name="SVM (bigmix) mc500train",
-        score=svmreg.predict,
-        opts=dict(
-            features=[
-                _bowcoref,
-                _hypbow,
-                _bowall1,
-                _bowall2,
-                _hypselect,
-                _hypselect2
-            ],
-            trainsets=["mc500.train"],
-            testsets=["mc500.test"]
-        )
-    )
+    # dict(
+    #     name="SVM (bigmix) mc160train",
+    #     score=svmreg.predict,
+    #     opts=dict(
+    #         features=[
+    #             _bowcoref,
+    #             _hypbow,
+    #             _bowall1,
+    #             _bowall2,
+    #             _hypselect,
+    #             _hypselect2,
+    #             _filter160
+    #         ],
+    #         trainsets=["mc160.train"],
+    #         testsets=["mc160.test"]
+    #     )
+    # ),
+    # dict(
+    #     name="SVM (bigmix) mc500train",
+    #     score=svmreg.predict,
+    #     opts=dict(
+    #         features=[
+    #             _bowcoref,
+    #             _hypbow,
+    #             _bowall1,
+    #             _bowall2,
+    #             _hypselect,
+    #             _hypselect2,
+    #             _filter500
+    #         ],
+    #         trainsets=["mc500.train"],
+    #         testsets=["mc500.test"]
+    #     )
+    # )
 ]
 
 results = {}

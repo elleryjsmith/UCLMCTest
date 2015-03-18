@@ -52,3 +52,7 @@ $ python main.py
 | _hypselect2 | 0.511458333333 | 0.420277777778 |
 | SVM (bigmix) mc160train | 0.623263888889 | 0 |
 | SVM (bigmix) mc500train | 0 | 0.547638888889 |
+| _filter160 | 0.713541666667 | 0 |
+| _filter500 | 0 | 0.569583333333 |
+| SVM (bigmix+rules) mc160train | 0.713541666667 | 0 |
+| SVM (bigmix+rules) mc500train | 0 | 0.601666666667 |
