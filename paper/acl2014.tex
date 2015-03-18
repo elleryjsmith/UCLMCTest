@@ -25,7 +25,7 @@
 \title{Solving MCTest with semantic textual similarity and matching rules??}
 
 \author
-       {A. Vlachos, T. Brown, N. Greco, G. Mocanu and E. J. Smith
+       {A. Vlachos, T. Brown, N. Greco, G. Mocanu and E. Smith
        \\
        Computer Science Department\\
 	University College London\\
@@ -97,15 +97,23 @@ return $sw_{1\ldots4}$
 
 \section{Preprocessing}
 % 2 pages
-Matching question-answer pairs with the story can be significantly improved by transform the two to become more {\em similar} to each other and removing words that are noise in the text.
-Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser\footnote{Some note on the Stanford parser}
+% an alternative version -Ellery
+
+Matching question-answer pairs with the story can be significantly improved by homogenising the format of all stories and question-answer strings. Our matching algorithms operate on raw textual tokens, which are lemmatised and stripped of all extraneous function words; however, the raw format was generated on-demand, rather than during the pre-processing stage, and we retained the deep grammatical structure of the text in order to dynamically alter the format based on certain question conditions.
+%transform the two to become more {\em similar} to each other and removing words that are noise in the text.
+%Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser\footnote{Some note on the Stanford parser}
 %TODO
 
-We focused on four pre-processing stages that will be discussed in this Section:
-co-reference resolution, hypernym annotation, sentence selection and combining question and answer.
+We focused on four pre-processing stages that will be discussed in this section: % Is the sentence selection really pre-processing? -ellery
+syntactic parsing and coreference resolution, hypernym annotation, sentence selection and combining question and answer.
 
-\subsection{Co-reference}
+\subsection{Syntactic Analysis}
 % Emil X % Ellery ?
+
+The initial pre-processing stage used the Stanford Parser REFERENCE and Stanford Dependencies REFERENCE to obtain phrase-structure and dependency trees for each story, along with its questions and answers. We also made use of the lemmatization and part-of-speech tagging provided by this system. This toolkit performed well on the given data, due to the intentional linguistic simplicity of the stories. Of the few inconsistencies, the majority were due to incorrect recognition of invented brand names (e.g. “Cookies n’ Crème” and “Friendly-O’s”) and the inability to categorize some subordinate dependencies. However, such cases were rare, and the errors introduced at this pre-processing stage were negligible in the final results.
+
+Following this, coreference information was extracted using the Stanford CoreNLP package REFERENCE. The passage text was parsed independently of the question and answer strings, so all coreference chains were local to the story itself. Resolving links between a question and its answer strings proved to be detrimental to performance. We used an out-of-the-box configuration of the coreference rules, as this was deemed to perform adequately on the simplisitic format of the given stories. Some errors emerged when resolving coreferences involving multiple entities, however, but correcting these errors is beyond the scope of this work.
+
 \subsection{Hypernym}
 % Ellery X
 \subsection{Sentence selection}
