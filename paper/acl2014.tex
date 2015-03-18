@@ -25,10 +25,10 @@
 \title{Solving MCTest with semantic textual similarity and matching rules??}
 
 \author
-       {A. Vlachos, T. Brown, N. Greco, G. Mocanu and E. J. Smith
+       {A. Vlachos, T. Brown, N. Greco, G. Mocanu and E. Smith
        \\
        Computer Science Department\\
-	University College London\\
+  University College London\\
        \tt{\{a.vlachos,t.brown,n.greco,g.mocanu,e.smith\}@cs.ucl.ac.uk}\\ 
        }
 
@@ -39,7 +39,7 @@
 \begin{abstract}
 MCTest is a recently developed test for evaluating Machine Comprehension.
 Our approach to the task is through textual similarity and shallow methods.
-We build a simple bag-of-words baseline and we enhance it through additional pre-processing (i.e. coreference resolution, hypernym).
+We build a simple bag-of-words baseline and we enhance it through additional pre-processing (i.e. co-reference resolution, hypernym).
 We build a set of features and train a logistic classifier that we use to score multiple-choice answers.
 Finally we show how the introduction of simple matching rules system outperform current results on the MCTest.
 \end{abstract}
@@ -49,7 +49,7 @@ Finally we show how the introduction of simple matching rules system outperform 
 %1 page
 
 \section{Previous work}
-% Nicola X % Tom ? % Emil ? Ellery ?
+% Nicola ? % Tom ? % Emil ? Ellery ?
 %1 page
 
 \newcite{deep_selection} uses bag-of-words as a baseline combining this shallow method with convolutional neural networks to capture complex semantics of a sentence.
@@ -95,17 +95,24 @@ return $sw_{1\ldots4}$
 \caption{\label{fig:mct_example} Lexical-based baseline algorithm }
 \end{figure}
 
-\section{Preprocessing}
+\section{Pre-processing}
 % 2 pages
-Matching question-answer pairs with the story can be significantly improved by transform the two to become more {\em similar} to each other and removing words that are noise in the text.
-Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser and CoreNLP~\cite{stanford_parser}
+Matching question-answer pairs with the story can be significantly improved by homogenising the format of all stories and question-answer strings. Our matching algorithms operate on raw textual tokens, which are lemmatized and stripped of all extraneous function words; however, the raw format was generated on-demand, rather than during the pre-processing stage, and we retained the deep grammatical structure of the text in order to dynamically alter the format based on certain question conditions.
+%transform the two to become more {\em similar} to each other and removing words that are noise in the text.
+%Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser\footnote{Some note on the Stanford parser}
 %TODO
 
-We focused on four pre-processing stages that will be discussed in this Section:
-co-reference resolution, hypernym annotation, sentence selection and combining question and answer.
+We focused on four pre-processing stages that will be discussed in this section:
+syntactic parsing and coreference resolution, hypernym annotation, sentence selection and combining question and answer.
 
-\subsection{Co-reference}
-% Emil X % Ellery ?
+
+\subsection{Syntactic Analysis}
+% Emil X % Ellery X
+
+
+The initial pre-processing stage used the Stanford Parser \cite{stanford_parser} and Stanford Dependencies \cite{de2008stanford} to obtain phrase-structure and dependency trees for each story, along with its questions and answers. We also made use of the lemmatization and Penn part-of-speech tagging \cite{marcus1993building} provided by this system. This toolkit performed well on the given data, due to the intentional linguistic simplicity of the stories. Of the few inconsistencies, the majority were due to incorrect recognition of invented brand names (e.g. “Cookies n’ Crème” and “Friendly-O’s”) and the inability to categorize some subordinate dependencies. However, such cases were rare, and the errors introduced at this pre-processing stage were negligible in the final results.
+
+Following this, coreference information was extracted using the Stanford CoreNLP package \cite{manning2014stanford}. The passage text was parsed independently of the question and answer strings, so all coreference chains were local to the story itself. Resolving links between a question and its answer strings proved to be detrimental to performance. We used an out-of-the-box configuration of the coreference rules, as this was deemed to perform adequately on the simplisitic format of the given stories. Some errors emerged when resolving coreferences involving multiple entities, however, but correcting these errors is beyond the scope of this work.
 \subsection{Hypernym}
 % Ellery X
 
@@ -134,7 +141,7 @@ at the same time, running matching the bag of words between the text entire text
 To improve on answering questions using multiple sentences, we propose to run the bag-of-words between each question-answer pair and the $n$ most relevant sentences for each question.
 The idea is to find the most relevant sentence in which the answer of the question is contained.
 This problem reduces to an information retrieval task.
-Previous attempts of retrieving the sentences with the highest relevance for question answering have been already proved successful in the literature \cite{qa_techniques, deep_selection}. %TODO better context?
+Previous attempts of retrieving the sentences with the highest relevance for question answering have been already proved successful in the literature \cite{qa_techniques,deep_selection}. %TODO better context?
 The process consist in retrieving the top $n$ ranked documents, (in this case, sentences) for a query $Q$.
 All the sentences $S_i$ in the story $S$ are scored by a scoring function $Score(Q, S_i)$.
 
