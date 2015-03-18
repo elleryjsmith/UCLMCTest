@@ -1,31 +1,26 @@
 %
 % File acl2014.tex
 %
-% Contact: koller@ling.uni-potsdam.de, yusuke@nii.ac.jp
-%%
-%% Based on the style files for ACL-2013, which were, in turn,
-%% Based on the style files for ACL-2012, which were, in turn,
-%% based on the style files for ACL-2011, which were, in turn, 
-%% based on the style files for ACL-2010, which were, in turn, 
-%% based on the style files for ACL-IJCNLP-2009, which were, in turn,
-%% based on the style files for EACL-2009 and IJCNLP-2008...
-
-%% Based on the style files for EACL 2006 by 
-%%e.agirre@ehu.es or Sergi.Balari@uab.es
-%% and that of ACL 08 by Joakim Nivre and Noah Smith
 
 \documentclass[11pt]{article}
+\usepackage{framed}
 \usepackage{acl2014}
 \usepackage{times}
 \usepackage{url}
 \usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{listings}
 
-%\setlength\titlebox{5cm}
-
-% You can expand the titlebox if you need extra space
-% to show all the authors. Please do not make the titlebox
-% smaller than 5cm (the original size); we will check this
-% in the camera-ready version and ask you to change it back.
+\def\subtitle#1\par{\removelastskip\bigskip\hrule
+   \noindent\vrule height12pt depth5pt width0pt #1\par
+   \hrule\nobreak\medskip
+}
+\def\begalg{\removelastskip\medskip
+  \bgroup \parindent=0pt \tt \obeylines \obeyspaces  
+          \everymath{\catcode`\ =10 \catcode`\^^M=5 }
+}
+\def\endalg{\egroup\medskip} 
+{\obeyspaces\global\def {\ }}
 
 
 \title{Solving MCTest with semantic textual similarity and matching rules??}
@@ -47,62 +42,122 @@ MCTest is a recently developed test for evaluating Machine Comprehension. Our ap
 \end{abstract}
 
 \section{Introduction}
-% Emil ? % Tom?
-1 page \cite{mctest} and \newcite{mctest}
+% Emil ? % Tom? Ellery ?
+%1 page
 
 \section{Previous work}
-% Nicola X % Tom ? % Emil ?
-1 page
+% Nicola X % Tom ? % Emil ? Ellery ?
+%1 page
+
+\newcite{deep_selection} uses bag-of-words as a baseline combining this shallow method with convolutional neural networks to capture complex semantics of a sentence.
+
+\newcite{deepread} proposed D{\small EEP}R{\small EAD} with shallow methods for story comprehension and combine them with some heuristics to answer questions `who / what / when".
 
 \section{Task description}
-% Tom ? % Emil ?
-1/2 a page--
+% Tom ? % Emil ? Ellery ?
+%1/2 a page--
+
+The task has been presented in  \cite{mctest}
 
 \section{Baseline}
 % Nicola X % Ellery ?
-Simpler compared to sliding window.
+We propose a baseline system, a simpler version than the originally proposed by \newcite{mctest} only using simple lexical feature. This system matches a bag of words constructed from the question and a candidate answer with each sentence in the story. The question-answer pair with the most words in common is considered the best candidate answer. Normalization are applied such as removing stop words stemming to remove affixes from words.
 
-However only textual similarity
+This semantic overlap approach treats the problem as a textual similarity task and would perform best when the pair is a subset of a sentence. However, this strategy ignores predicate-argument structure and can easily fail in the presence of quantifiers, negations or synonyms. Work on story comprehension using bag-of-words has a long history, \newcite{deepread} proposed D{\small EEP}R{\small EAD} and showed how such systems with some heuristics can achieve high accuracy especially on questions with ``who / what / when", which is most part of our questions.
 
-half a page
+We will build upon this baseline in Section~\ref{sec:bagofwords} and combine it with heuristics in Section~\ref{sec:rulebased}. Results for MC160 and MC500 are shown in Table \ref{tab:resultBOWMC160} and Table \ref{tab:resultBOWMC500}. The baseline has been authored without seeing both the test sets.
+
+\begin{figure}
+
+\subtitle Definitions
+
+Passage $P$, $P_i$ sentence $i$ in passage $P$, set of words in question Q, set of words in candidate answer $A_{1..4}$ and set of stop words $X$.
+
+\subtitle Algorithm 1 Sentence level bag-of-words
+
+\begalg
+for $i$=1 to 4 do
+   $S$ = $A_i \cup Q$
+end for
+return $sw_{1\ldots4}$
+\endalg
+
+\caption{\label{fig:mct_example} Lexical-based baseline algorithm }
+\end{figure}
+
 \section{Preprocessing}
-2 pages
+% 2 pages
+Matching question-answer pairs with the story can be significantly improved by transform the two to become more {\em similar} to each other and removing words that are noise in the text. Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser\footnote{Some note on the Stanford parser}
+%TODO
+
+We focused on four pre-processing stages that will be discussed in this Section: co-reference resolution, hypernym annotation, sentence selection and combining question and answer.
+
 \subsection{Co-reference}
 % Emil ? % Ellery ?
 \subsection{Hypernym}
-% Ellery ?
+% Ellery X
 \subsection{Sentence selection}
 % Nicola X
+The current baseline chooses the best candidate on the basis of how much it matches one sentence in the corpus. This is a clear disadvantage give that the MCTest has questions whose answer may be in contained in multiple sentences; At the same time, running matching the bag of words between the text entire text with the question-answer pair would give poor results  since (%TODO give a better reason
+).
+
+To improve on answering questions using multiple sentences, we propose to run the bag-of-words on the $n$ most relevant sentences for answering the question. This problem reduces to an information retrieval task. The idea of retrieve the sentences with the highest relevance for question answering has been already proved successful in the literature \cite{qa_techniques, deep_selection}. In order to rank the sentences in the story we will have a scoring function $selectScore(query, document)$, that given a $query$ and a $document$, it will %TODO
+
+We will need a scoring function that will score each sentence
+%question
+
+ For the purpose of this paper we are going to re-use our bag-of-words combined with hypernym and coreference to rank the most relevant sentences (in details in Section~\ref{sec:bigmix})
+
+%Question
+
+
+ (Some is q, some is qa)  By tuning on both the {\small MC160} and {\small MC500} training set, $n=3$ gets the highest results.
+
+Reduces the task to an information retrieval
+how to score the best answers
+
 \subsection{Question answer combiner}
 % Tom?
 
 \section{Strategy}
-1.5 pages
+%1.5 pages
 \subsection{Bag of words}
+\label{sec:bagofwords}
 % Nicola X % Ellery ?
 several features
 BOWNN
 BOW Complement
 Bow ALL
 
+The great 6
+
 \subsection{Scoring function}
 % Nicola X
-same problem as Deep Selection
+equations of deep selection
+
+scoring question answer pairs
+the choice of the SVM and gridsearch
+\label{sec:bigmix}
 
 \subsection{Rule based system}
+\label{sec:rulebased}
 % Ellery X
 
 \section{Experiments and results}
 % Nicola ? % Emil ? % Tom?
-1 page
+%1 page
 
 \section{Evaluation of strategies}
 % Ellery ?
-3 pages
+%3 pages
 
 \section{Future work and conclusion}
 % Ellery ? Tom ? Emil?
-1/2 a page
+%1/2 a page
+
+Semantic overlap is typically a symmetric relation while textual entailment is clearly not, this is a serious limitation of our baseline and the systems built on top. However, the great results show how really simple methods can achieve great results on the MCTest.
+
+Wordnet for synonym as well in addition to hypernym
 
 \section*{Acknowledgments}
 Thanks to
