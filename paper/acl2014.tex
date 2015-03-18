@@ -98,7 +98,7 @@ return $sw_{1\ldots4}$
 \section{Preprocessing}
 % 2 pages
 Matching question-answer pairs with the story can be significantly improved by transform the two to become more {\em similar} to each other and removing words that are noise in the text.
-Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser\footnote{Some note on the Stanford parser}
+Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser and CoreNLP~\cite{stanford_parser}
 %TODO
 
 We focused on four pre-processing stages that will be discussed in this Section:
@@ -108,30 +108,6 @@ co-reference resolution, hypernym annotation, sentence selection and combining q
 % Emil X % Ellery ?
 \subsection{Hypernym}
 % Ellery X
-\subsection{Sentence selection}
-% Nicola X
-The current baseline chooses the best candidate on the basis of how much it matches one sentence in the corpus.
-This is a clear disadvantage give that the MCTest has questions whose answer may be in contained in multiple sentences;
-at the same time, running matching the bag of words between the text entire text with the question-answer pair would give poor results  since (%TODO give a better reason
-).
-
-To improve on answering questions using multiple sentences, we propose to run the bag-of-words on the $n$ most relevant sentences for answering the question.
-This problem reduces to an information retrieval task.
-The idea of retrieve the sentences with the highest relevance for question answering has been already proved successful in the literature \cite{qa_techniques, deep_selection}.
-In order to rank the sentences in the story we will have a scoring function $selectScore(query, document)$, that given a $query$ and a $document$, it will %TODO
-
-We will need a scoring function that will score each sentence
-%question
-
- For the purpose of this paper we are going to re-use our bag-of-words combined with hypernym and coreference to rank the most relevant sentences (in details in Section~\ref{sec:bigmix})
-
-%Question
-
-
-(Some is q, some is qa)  By tuning on both the {\small MC160} and {\small MC500} training set, $n=3$ gets the highest results.
-
-Reduces the task to an information retrieval
-how to score the best answers
 
 \subsection{Question answer combiner}
 % Tom X
@@ -147,6 +123,51 @@ BOW Complement
 Bow ALL
 
 The great 6
+
+\subsection{Sentence selection}
+% Nicola X
+The current baseline chooses the best candidate on the basis of how much it matches one sentence in the corpus.
+This is a clear disadvantage give that the MCTest has questions whose answer may be in contained in multiple sentences;
+at the same time, running matching the bag of words between the text entire text with the question-answer pair would give poor results  since (%TODO give a better reason
+).
+
+To improve on answering questions using multiple sentences, we propose to run the bag-of-words between each question-answer pair and the $n$ most relevant sentences for each question.
+The idea is to find the most relevant sentence in which the answer of the question is contained.
+This problem reduces to an information retrieval task.
+Previous attempts of retrieving the sentences with the highest relevance for question answering have been already proved successful in the literature \cite{qa_techniques, deep_selection}. %TODO better context?
+The process consist in retrieving the top $n$ ranked documents, (in this case, sentences) for a query $Q$.
+All the sentences $S_i$ in the story $S$ are scored by a scoring function $Score(Q, S_i)$.
+
+Choosing the right query is as important as the implementation of the scoring function.
+Initially, our query was a stemmed version and without stop words of the question as the query $Q$.
+Following an evaluation on the MC160 development set, we found that in some cases the sentences retrieved were relevant to the question, but not to the answer.
+For example (see Figure~\ref{fig:mct_example}), although {\em ``Who was having a birthday?"} contains the right keyword {\em ``birthday"} to understand that the first sentence contains the answer, {\em ``How did Jessie get ready for the party?"} does not.
+Sentences like {\em ``She was having a party"} will very likely have an higher score than {\em ``She made a big cake, and hung up some balloons."} that exactly contains the correct answer $B$.
+Hence, we decided to use as a query a combination with the question with all of the four answers.
+
+For the purpose of this paper we are going to re-use our bag-of-words combined with hypernym and coreference to rank the most relevant sentences (in details in Section~\ref{sec:bigmix}).
+By tuning on both the {\small MC160} and {\small MC500} training set, we set $n=3$ as it performs best.
+
+\begin{figure}[!th]
+\begin{framed}
+\begin{flushleft}
+{\small Q0}: It was Jessie Bear's birthday. She was having a party.  She asked her two best friends to
+come to the party.  She made a big cake, and hung up some balloons.*\newline\newline
+1) Who was having a birthday?\\
+\textbf{A) Jessie Bear}\\
+B) no one\\
+C) Lion\\
+D) Tiger\newline\newline
+3) How did Jessie get ready for the party?\\
+A) made cake and juice.\\
+\textbf{B) made cake and hung balloons.}\\
+C) made juice and cookies.\\
+D) made juice and hung balloons.\newline\newline
+{\small  \textsuperscript{*}Only relevant part of question {\small Q0} has been reported}
+\end{flushleft}
+\end{framed}
+\caption{\label{fig:mct_example} Question Q0 from the MC160 development set}
+\end{figure}
 
 \subsection{Scoring function}
 % Nicola X
