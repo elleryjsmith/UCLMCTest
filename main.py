@@ -96,239 +96,239 @@ def bigMixSum(stories, opts=None):
     return sum_v
 
 methods = [
-    dict(
-        name="BOW NN",
-        score=bow.predictAllNN,
-        opts=dict(
-            testsets=testsets
-        )
-    ),
-    dict(
-        name="BOW NP",
-        score=bow.predictAllVB,
-        opts=dict(
-            testsets=testsets
-        )
-    ),
-    dict(
-        name="Baseline (BOW)",
-        score=bow.predict,
-        opts=dict(
-            testsets=testsets
-        )
-    ),
-    dict(
-        name="BOW coref",
-        score=bow.predictAll,
-        opts=dict(
-            testsets=testsets,
-            bow_f=bow.coref_bow
-        )
-    ),
-    dict(
-        name="Baseline (BOW) all",
-        score=bow.predictAll,
-        opts=dict(
-            testsets=testsets
-        )
-    ),
-    dict(
-        name="SVM (BOW) train mc160train",
-        score=svm.predict,
-        opts=dict(
-            trainsets=["mc160.train"],
-            testsets=["mc160.dev"],
-            features=[bow.predict]
-        )
-    ),
-    dict(
-        name="SVM (BOW) train mc500train",
-        score=svm.predict,
-        opts=dict(
-            trainsets=["mc500.train"],
-            testsets=["mc500.dev"],
-            features=[bow.predict]
-        )
-    ),
-    dict(
-        name="SVM (BOW+BOWall) train mc160train",
-        score=svm.predict,
-        opts=dict(
-            trainsets=["mc160.train"],
-            testsets=["mc160.dev"],
-            features=[bow.predict, bow.predictAll]
-        )
-    ),
-    dict(
-        name="SVM (BOWall+BOWcomplement) train mc160train",
-        score=svm.predict,
-        opts=dict(
-            trainsets=["mc160.train"],
-            testsets=["mc160.dev"],
-            features=[bow.predictComplement, bow.predictAll, bow.predictAllNN, bow.predictAllVB]
-        )
-    ),
-    dict(
-        name="SVM (BOW+BOWall) train mc500train",
-        score=svm.predict,
-        opts=dict(
-            trainsets=["mc500.train"],
-            testsets=["mc500.dev"],
-            features=[bow.predict, bow.predictAll]
-        )
-    ),
-    dict(
-        name="LogReg (BOW+BOWall) mc160train",
-        score=logreg.predict,
-        opts=dict(
-            trainsets=["mc160.train"],
-            testsets=["mc160.dev"]
-        )
-    ),
-    dict(
-        name="LogReg (BOW+BOWall) mc500train",
-        score=logreg.predict,
-        opts=dict(
-            trainsets=["mc500.train"],
-            testsets=["mc500.dev"]
-        )
-    ),
-    dict(
-        name="LogReg (BOWall+BOWComplement+BOWNN+BOWVB) mc160train",
-        score=logreg.predict,
-        opts=dict(
-            features=[
-                bow.predictAll,
-                # bow.predictAllNN,
-                # bow.predictAllVB,
-                bow.predictComplement,
-                hypbow
-            ],
-            trainsets=["mc160.train"],
-            testsets=["mc160.dev"],
-            select_f=bow.bow_qa_select,
-            select_limit=2
-        )
-    ),
-    dict(
-        name="LogReg (BOWall+BOWComplement+BOWNN+BOWVB) mc500train",
-        score=logreg.predict,
-        opts=dict(
-            features=[
-                bow.predictAll,
-                bow.predictAllNN,
-                bow.predictAllVB,
-                bow.predictComplement
-            ],
-            trainsets=["mc500.train"],
-            testsets=["mc500.dev"]
-        )
-    ),
-    dict(
-        name="Hypernym BOW",
-        score=hypbow,
-        opts=dict(
-            testsets=testsets
-        )
-    ),
-    dict(
-        name="Baseline (BOW) selection 2",
-        score=bow.predictAll,
-        opts=dict(
-            testsets=testsets,
-            select_f=bow.bow_qa_select,
-            select_limit=2
-        )
-    ),
-    dict(
-        name="Hypernym BOW selection 2",
-        score=hypbow,
-        opts=dict(
-            testsets=testsets,
-            select_f=hyp_qa_select,
-            select_limit=2
-        )
-    ),
-    dict(
-        name="_bowcoref",
-        score=_bowcoref,
-        opts=dict(
-            testsets=testsets,
-            pickle=True
-        )
-    ),
-    dict(
-        name="_hypbow",
-        score=_hypbow,
-        opts=dict(
-            testsets=testsets,
-            pickle=True
-        )
-    ),
-    dict(
-        name="_bowall1",
-        score=_bowall1,
-        opts=dict(
-            testsets=testsets,
-            pickle=True
-        )
-    ),
-    dict(
-        name="_bowall2",
-        score=_bowall2,
-        opts=dict(
-            testsets=testsets,
-            pickle=True
-        )
-    ),
-    dict(
-        name="_hypselect",
-        score=_hypselect,
-        opts=dict(
-            testsets=testsets,
-            pickle=True
-        )
-    ),
-    dict(
-        name="_hypselect2",
-        score=_hypselect2,
-        opts=dict(
-            testsets=testsets,
-            pickle=True
-        )
-    ),
-    dict(
-        name="SVM (bigmix) mc160train",
-        score=svmreg.predict,
-        opts=dict(
-            features=[
-                _bowcoref,
-                _hypbow,
-                _bowall1,
-                _bowall2,
-                _hypselect,
-                _hypselect2
-            ],
-            trainsets=["mc160.train"],
-            testsets=["mc160.dev"]
-        )
-    ),
-    dict(
-        name="SVM (bigmix) mc500train",
-        score=svmreg.predict,
-        opts=dict(
-            features=[
-                _bowcoref,
-                _hypbow,
-                _bowall1,
-                _bowall2,
-                _hypselect,
-                _hypselect2
-            ],
-            trainsets=["mc500.train"],
-            testsets=["mc500.dev"]
-        )
-    ),
+    # dict(
+    #     name="BOW NN",
+    #     score=bow.predictAllNN,
+    #     opts=dict(
+    #         testsets=testsets
+    #     )
+    # ),
+    # dict(
+    #     name="BOW NP",
+    #     score=bow.predictAllVB,
+    #     opts=dict(
+    #         testsets=testsets
+    #     )
+    # ),
+    # dict(
+    #     name="Baseline (BOW)",
+    #     score=bow.predict,
+    #     opts=dict(
+    #         testsets=testsets
+    #     )
+    # ),
+    # dict(
+    #     name="BOW coref",
+    #     score=bow.predictAll,
+    #     opts=dict(
+    #         testsets=testsets,
+    #         bow_f=bow.coref_bow
+    #     )
+    # ),
+    # dict(
+    #     name="Baseline (BOW) all",
+    #     score=bow.predictAll,
+    #     opts=dict(
+    #         testsets=testsets
+    #     )
+    # ),
+    # dict(
+    #     name="SVM (BOW) train mc160train",
+    #     score=svm.predict,
+    #     opts=dict(
+    #         trainsets=["mc160.train"],
+    #         testsets=["mc160.dev"],
+    #         features=[bow.predict]
+    #     )
+    # ),
+    # dict(
+    #     name="SVM (BOW) train mc500train",
+    #     score=svm.predict,
+    #     opts=dict(
+    #         trainsets=["mc500.train"],
+    #         testsets=["mc500.dev"],
+    #         features=[bow.predict]
+    #     )
+    # ),
+    # dict(
+    #     name="SVM (BOW+BOWall) train mc160train",
+    #     score=svm.predict,
+    #     opts=dict(
+    #         trainsets=["mc160.train"],
+    #         testsets=["mc160.dev"],
+    #         features=[bow.predict, bow.predictAll]
+    #     )
+    # ),
+    # dict(
+    #     name="SVM (BOWall+BOWcomplement) train mc160train",
+    #     score=svm.predict,
+    #     opts=dict(
+    #         trainsets=["mc160.train"],
+    #         testsets=["mc160.dev"],
+    #         features=[bow.predictComplement, bow.predictAll, bow.predictAllNN, bow.predictAllVB]
+    #     )
+    # ),
+    # dict(
+    #     name="SVM (BOW+BOWall) train mc500train",
+    #     score=svm.predict,
+    #     opts=dict(
+    #         trainsets=["mc500.train"],
+    #         testsets=["mc500.dev"],
+    #         features=[bow.predict, bow.predictAll]
+    #     )
+    # ),
+    # dict(
+    #     name="LogReg (BOW+BOWall) mc160train",
+    #     score=logreg.predict,
+    #     opts=dict(
+    #         trainsets=["mc160.train"],
+    #         testsets=["mc160.dev"]
+    #     )
+    # ),
+    # dict(
+    #     name="LogReg (BOW+BOWall) mc500train",
+    #     score=logreg.predict,
+    #     opts=dict(
+    #         trainsets=["mc500.train"],
+    #         testsets=["mc500.dev"]
+    #     )
+    # ),
+    # dict(
+    #     name="LogReg (BOWall+BOWComplement+BOWNN+BOWVB) mc160train",
+    #     score=logreg.predict,
+    #     opts=dict(
+    #         features=[
+    #             bow.predictAll,
+    #             # bow.predictAllNN,
+    #             # bow.predictAllVB,
+    #             bow.predictComplement,
+    #             hypbow
+    #         ],
+    #         trainsets=["mc160.train"],
+    #         testsets=["mc160.dev"],
+    #         select_f=bow.bow_qa_select,
+    #         select_limit=2
+    #     )
+    # ),
+    # dict(
+    #     name="LogReg (BOWall+BOWComplement+BOWNN+BOWVB) mc500train",
+    #     score=logreg.predict,
+    #     opts=dict(
+    #         features=[
+    #             bow.predictAll,
+    #             bow.predictAllNN,
+    #             bow.predictAllVB,
+    #             bow.predictComplement
+    #         ],
+    #         trainsets=["mc500.train"],
+    #         testsets=["mc500.dev"]
+    #     )
+    # ),
+    # dict(
+    #     name="Hypernym BOW",
+    #     score=hypbow,
+    #     opts=dict(
+    #         testsets=testsets
+    #     )
+    # ),
+    # dict(
+    #     name="Baseline (BOW) selection 2",
+    #     score=bow.predictAll,
+    #     opts=dict(
+    #         testsets=testsets,
+    #         select_f=bow.bow_qa_select,
+    #         select_limit=2
+    #     )
+    # ),
+    # dict(
+    #     name="Hypernym BOW selection 2",
+    #     score=hypbow,
+    #     opts=dict(
+    #         testsets=testsets,
+    #         select_f=hyp_qa_select,
+    #         select_limit=2
+    #     )
+    # ),
+    # dict(
+    #     name="_bowcoref",
+    #     score=_bowcoref,
+    #     opts=dict(
+    #         testsets=testsets,
+    #         pickle=True
+    #     )
+    # ),
+    # dict(
+    #     name="_hypbow",
+    #     score=_hypbow,
+    #     opts=dict(
+    #         testsets=testsets,
+    #         pickle=True
+    #     )
+    # ),
+    # dict(
+    #     name="_bowall1",
+    #     score=_bowall1,
+    #     opts=dict(
+    #         testsets=testsets,
+    #         pickle=True
+    #     )
+    # ),
+    # dict(
+    #     name="_bowall2",
+    #     score=_bowall2,
+    #     opts=dict(
+    #         testsets=testsets,
+    #         pickle=True
+    #     )
+    # ),
+    # dict(
+    #     name="_hypselect",
+    #     score=_hypselect,
+    #     opts=dict(
+    #         testsets=testsets,
+    #         pickle=True
+    #     )
+    # ),
+    # dict(
+    #     name="_hypselect2",
+    #     score=_hypselect2,
+    #     opts=dict(
+    #         testsets=testsets,
+    #         pickle=True
+    #     )
+    # ),
+    # dict(
+    #     name="SVM (bigmix) mc160train",
+    #     score=svmreg.predict,
+    #     opts=dict(
+    #         features=[
+    #             _bowcoref,
+    #             _hypbow,
+    #             _bowall1,
+    #             _bowall2,
+    #             _hypselect,
+    #             _hypselect2
+    #         ],
+    #         trainsets=["mc160.train"],
+    #         testsets=["mc160.dev"]
+    #     )
+    # ),
+    # dict(
+    #     name="SVM (bigmix) mc500train",
+    #     score=svmreg.predict,
+    #     opts=dict(
+    #         features=[
+    #             _bowcoref,
+    #             _hypbow,
+    #             _bowall1,
+    #             _bowall2,
+    #             _hypselect,
+    #             _hypselect2
+    #         ],
+    #         trainsets=["mc500.train"],
+    #         testsets=["mc500.dev"]
+    #     )
+    # ),
     dict(
         name="SVM (bigmix) mc160train",
         score=svmreg.predict,
