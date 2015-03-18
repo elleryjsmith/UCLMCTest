@@ -1,0 +1,29 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citename{Harabagiu \bgroup et al.\egroup
+  }2003]{qa_techniques}
+Sanda~M. Harabagiu, Steven~J. Maiorano, and Marius Pasca.
+\newblock 2003.
+\newblock Open-domain textual question answering techniques.
+\newblock {\em Natural Language Engineering}, 9(3):231--267.
+
+\bibitem[\protect\citename{Hirschman \bgroup et al.\egroup }1999]{deepread}
+Lynette Hirschman, Marc Light, Eric Breck, and John~D. Burger.
+\newblock 1999.
+\newblock Deep read: A reading comprehension system.
+\newblock In {\em ACL}, pages 325--332.
+
+\bibitem[\protect\citename{Richardson \bgroup et al.\egroup }2013]{mctest}
+Matthew Richardson, Christopher J.~C. Burges, and Erin Renshaw.
+\newblock 2013.
+\newblock Mctest: {A} challenge dataset for the open-domain machine
+  comprehension of text.
+\newblock In {\em {EMNLP}-SIGDAT}, pages 193--203.
+
+\bibitem[\protect\citename{Yu \bgroup et al.\egroup }2014]{deep_selection}
+Lei Yu, Karl~Moritz Hermann, Phil Blunsom, and Stephen Pulman.
+\newblock 2014.
+\newblock Deep learning for answer sentence selection.
+\newblock {\em CoRR}, abs/1412.1632.
+
+\end{thebibliography}
