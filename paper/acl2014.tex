@@ -37,7 +37,11 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-MCTest is a recently developed test for evaluating Machine Comprehension. Our approach to the task is through textual similarity and shallow methods. We build a simple bag-of-words baseline and we enhance it through additional pre-processing (i.e. coreference resolution, hypernym). We build a set of features and train a logistic classifier that we use to score multiple-choice answers. Finally we show how the introduction of simple matching rules system outperform current results on the MCTest.
+MCTest is a recently developed test for evaluating Machine Comprehension.
+Our approach to the task is through textual similarity and shallow methods.
+We build a simple bag-of-words baseline and we enhance it through additional pre-processing (i.e. coreference resolution, hypernym).
+We build a set of features and train a logistic classifier that we use to score multiple-choice answers.
+Finally we show how the introduction of simple matching rules system outperform current results on the MCTest.
 \end{abstract}
 
 \section{Introduction}
@@ -60,11 +64,18 @@ The task has been presented in  \cite{mctest}
 
 \section{Baseline}
 % Nicola X % Ellery ?
-We propose a baseline system, a simpler version than the originally proposed by \newcite{mctest} only using simple lexical feature. This system matches a bag of words constructed from the question and a candidate answer with each sentence in the story. The question-answer pair with the most words in common is considered the best candidate answer. Normalization are applied such as removing stop words stemming to remove affixes from words.
+We propose a baseline system, a simpler version than the originally proposed by \newcite{mctest} only using simple lexical feature.
+This system matches a bag of words constructed from the question and a candidate answer with each sentence in the story.
+The question-answer pair with the most words in common is considered the best candidate answer.
+Normalization are applied such as removing stop words stemming to remove affixes from words.
 
-This semantic overlap approach treats the problem as a textual similarity task and would perform best when the pair is a subset of a sentence. However, this strategy ignores predicate-argument structure and can easily fail in the presence of quantifiers, negations or synonyms. Work on story comprehension using bag-of-words has a long history, \newcite{deepread} proposed D{\small EEP}R{\small EAD} and showed how such systems with some heuristics can achieve high accuracy especially on questions with ``who / what / when", which is most part of our questions.
+This semantic overlap approach treats the problem as a textual similarity task and would perform best when the pair is a subset of a sentence.
+However, this strategy ignores predicate-argument structure and can easily fail in the presence of quantifiers, negations or synonyms.
+Work on story comprehension using bag-of-words has a long history, \newcite{deepread} proposed D{\small EEP}R{\small EAD} and showed how such systems with some heuristics can achieve high accuracy especially on questions with ``who / what / when", which is most part of our questions.
 
-We will build upon this baseline in Section~\ref{sec:bagofwords} and combine it with heuristics in Section~\ref{sec:rulebased}. Results for MC160 and MC500 are shown in Table \ref{tab:resultBOWMC160} and Table \ref{tab:resultBOWMC500}. The baseline has been authored without seeing both the test sets.
+We will build upon this baseline in Section~\ref{sec:bagofwords} and combine it with heuristics in Section~\ref{sec:rulebased}.
+Results for MC160 and MC500 are shown in Table \ref{tab:resultBOWMC160} and Table \ref{tab:resultBOWMC500}.
+The baseline has been authored without seeing both the test sets.
 
 \begin{figure}
 
@@ -86,10 +97,12 @@ return $sw_{1\ldots4}$
 
 \section{Preprocessing}
 % 2 pages
-Matching question-answer pairs with the story can be significantly improved by transform the two to become more {\em similar} to each other and removing words that are noise in the text. Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser\footnote{Some note on the Stanford parser}
+Matching question-answer pairs with the story can be significantly improved by transform the two to become more {\em similar} to each other and removing words that are noise in the text.
+Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser\footnote{Some note on the Stanford parser}
 %TODO
 
-We focused on four pre-processing stages that will be discussed in this Section: co-reference resolution, hypernym annotation, sentence selection and combining question and answer.
+We focused on four pre-processing stages that will be discussed in this Section:
+co-reference resolution, hypernym annotation, sentence selection and combining question and answer.
 
 \subsection{Co-reference}
 % Emil X % Ellery ?
@@ -97,10 +110,15 @@ We focused on four pre-processing stages that will be discussed in this Section:
 % Ellery X
 \subsection{Sentence selection}
 % Nicola X
-The current baseline chooses the best candidate on the basis of how much it matches one sentence in the corpus. This is a clear disadvantage give that the MCTest has questions whose answer may be in contained in multiple sentences; At the same time, running matching the bag of words between the text entire text with the question-answer pair would give poor results  since (%TODO give a better reason
+The current baseline chooses the best candidate on the basis of how much it matches one sentence in the corpus.
+This is a clear disadvantage give that the MCTest has questions whose answer may be in contained in multiple sentences;
+at the same time, running matching the bag of words between the text entire text with the question-answer pair would give poor results  since (%TODO give a better reason
 ).
 
-To improve on answering questions using multiple sentences, we propose to run the bag-of-words on the $n$ most relevant sentences for answering the question. This problem reduces to an information retrieval task. The idea of retrieve the sentences with the highest relevance for question answering has been already proved successful in the literature \cite{qa_techniques, deep_selection}. In order to rank the sentences in the story we will have a scoring function $selectScore(query, document)$, that given a $query$ and a $document$, it will %TODO
+To improve on answering questions using multiple sentences, we propose to run the bag-of-words on the $n$ most relevant sentences for answering the question.
+This problem reduces to an information retrieval task.
+The idea of retrieve the sentences with the highest relevance for question answering has been already proved successful in the literature \cite{qa_techniques, deep_selection}.
+In order to rank the sentences in the story we will have a scoring function $selectScore(query, document)$, that given a $query$ and a $document$, it will %TODO
 
 We will need a scoring function that will score each sentence
 %question
@@ -110,7 +128,7 @@ We will need a scoring function that will score each sentence
 %Question
 
 
- (Some is q, some is qa)  By tuning on both the {\small MC160} and {\small MC500} training set, $n=3$ gets the highest results.
+(Some is q, some is qa)  By tuning on both the {\small MC160} and {\small MC500} training set, $n=3$ gets the highest results.
 
 Reduces the task to an information retrieval
 how to score the best answers
@@ -154,7 +172,8 @@ the choice of the SVM and gridsearch
 % Ellery ? Tom ? Emil?
 %1/2 a page
 
-Semantic overlap is typically a symmetric relation while textual entailment is clearly not, this is a serious limitation of our baseline and the systems built on top. However, the great results show how really simple methods can achieve great results on the MCTest.
+Semantic overlap is typically a symmetric relation while textual entailment is clearly not, this is a serious limitation of our baseline and the systems built on top.
+However, the great results show how really simple methods can achieve great results on the MCTest.
 
 Wordnet for synonym as well in addition to hypernym
 
