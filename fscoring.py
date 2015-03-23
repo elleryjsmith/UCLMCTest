@@ -16,7 +16,6 @@ def fscore160(story, qs, an, bow_filter=None, bow_f=None):
     setflg(True)
     
     filters = [Filter(None,md.baseline160),
-               #Filter(None,md.hypernymy),
                Filter(fl.whyquestion,md.whystory),
                #Filter(fl.complexnegative,md.complexnegate),
                Filter(fl.simplenegative,md.simplenegate),
@@ -38,8 +37,7 @@ def fscore500(story, q, a, bow_filter=None, bow_f=None):
     setflg(False)
 
     filters = [Filter(None,md.baseline500),
-               #Filter(None,md.hypernymy),
-               Filter(fl.whyquestion,md.whystory),
+               #Filter(fl.whyquestion,md.whystory),
                #Filter(fl.complexnegative,md.complexnegate),
                Filter(fl.simplenegative,md.simplenegate),
                #Filter(fl.tempquestion,md.tempstory),

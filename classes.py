@@ -64,16 +64,18 @@ class Sentence(object):
 
         s = dict()
 
-        for c in set(self.coreference):
+        #for c in self.coreference:
+        for c in ({t.lemma for t in self.words} - sw):
             s[c] = 1.0
-
-        weight = lambda x : 1.0 / pow(10,x)
         
-        for w in [w for w in self.words if w.lemma in ({w.lemma for w in self.words} - sw)]:        
+        weight = lambda x : 1.0 / (x+1)#pow(2,x)
+        
+        for w in [w for w in self.words if w.lemma in ({w.lemma for w in self.words} - sw)]:
             for y in w.synsets:
                 for h,d in y.dfs()[1:]:
-                    if h.lexname() not in s or s[h.lexname()] < weight(d):
-                        s[h.lexname()] = weight(d)
+                    if d < 4:
+                        if h.lexname() not in s or s[h.lexname()] < weight(d):
+                            s[h.lexname()] = weight(d)
         
         return s
 

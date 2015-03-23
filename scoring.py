@@ -50,7 +50,7 @@ def distance(q,a,story):
     i = 0
     for s in story.sentences:
         for t in s.wbow:
-            ts = {t.lemma} if flg160 else set(map(lambda x:x[0],s.wbow[t]))
+            ts = {t.lemma,t.token.lower()} if flg160 else set(map(lambda x:x[0],s.wbow[t]))
             if qst & ts:
                 qoccs.append(i)
             if ast & ts:

@@ -12,23 +12,25 @@ from UCLMCTest.selection import filtered_story
 STOPWORDS = nltk.corpus.stopwords.words('english')
 
 
-def coref_bow(s1, s2, bow_filter=None):
+def coref_bow(qa, s, bow_filter=None):
     if bow_filter:
-        s1 = [t for t in s1 if t.pos == bow_filter]
-        s2 = [t for t in s2 if t.pos == bow_filter]
+        qa = [t for t in qa if t.pos == bow_filter]
+        s = [t for t in s if t.pos == bow_filter]
+    
+    set1 = [c.lower() for t in qa for c in t.coreference() if "'" not in c]
+    set2 = [c.lower() for t in s for c in t.coreference() if "'" not in c]
 
-    set1 = []
-    for t in s1:
-        if t.coref != []: [set1.append(c) for c in t.coref]
-        else: set1.append(t.lemma)
+    set1 = [w for w in set1 if w not in STOPWORDS]
+    set2 = [w for w in set2 if w not in STOPWORDS]
 
-    set2 = []
-    for t in s2:
-        if t.coref != []: [set2.append(c) for c in t.coref]
-        else: set2.append(t.lemma)
+    return set(set1) & set(set2)
 
-    # print "\nsentence1:", " ".join([t.token for t in s1]), "\n", set1
-    # print "sentence2:", " ".join([t.token for t in s2]), "\n", set2
+def coref_bowall(qa, story, bow_filter=None):
+
+    set1 = [c.lower() for s in story.sentences
+             for t in s.words for c in t.coreference()
+             if not bow_filter or t.pos == bow_filter]
+    set2 = [c.lower() for t in qa for c in t.coreference() if "'" not in c]
 
     set1 = [w for w in set1 if w not in STOPWORDS]
     set2 = [w for w in set2 if w not in STOPWORDS]
@@ -36,17 +38,33 @@ def coref_bow(s1, s2, bow_filter=None):
     return set(set1) & set(set2)
 
 
-def bow(s1, s2, bow_filter=None):
-    if bow_filter:
-        s1 = [t for t in s1 if t.pos == bow_filter]
-        s2 = [t for t in s2 if t.pos == bow_filter]
 
-    set1 = {t.lemma for t in s1 if t.lemma not in STOPWORDS} \
-        | {t.token for t in s1 if t.token not in STOPWORDS}
-    set2 = {t.lemma for t in s2 if t.lemma not in STOPWORDS} \
-        | {t.token for t in s2 if t.token not in STOPWORDS}
+def bow(qa, s, bow_filter=None):
+    if bow_filter:
+        qa = [t for t in qa if t.pos == bow_filter]
+        s = [t for t in s.words if t.pos == bow_filter]
+
+    set1 = {t.lemma for t in qa if t.lemma not in STOPWORDS} \
+        | {t.token.lower() for t in qa if t.token.lower() not in STOPWORDS}
+    set2 = {t.lemma for t in s if t.lemma not in STOPWORDS} \
+        | {t.token.lower() for t in s if t.token.lower() not in STOPWORDS}
     return set1 & set2
 
+def bowall(qa, story, bow_filter=None):
+
+    words = [t for s in story.sentences for t in s.words
+             if not bow_filter or t.pos == bow_filter]
+    qa = [t for t in qa if not bow_filter or t.pos == bow_filter]
+
+    set1 = {t.lemma for t in qa if t.lemma not in STOPWORDS} \
+        | {t.token.lower() for t in qa if t.token.lower() not in STOPWORDS}
+    set2 = {t.lemma for t in words if t.lemma not in STOPWORDS} \
+        | {t.token.lower() for t in words if t.token.lower() not in STOPWORDS}
+    return set1 & set2
+
+def qapair(q, a):
+
+    return [t for t in q.words] + [t for t in a.words]
 
 def previous_bow(s1, s2):
     sim = []
@@ -65,26 +83,24 @@ def previous_bow(s1, s2):
 def score(story, question_n, answer_n, bow_filter=None, bow_f=bow):
     question = story.questions[question_n]
     answer = question.answers[answer_n]
-    qa_pair = question.qsentence.words + answer.words
+    qa_pair = qapair(question.qsentence,answer)
     similarities = [bow_f(qa_pair, s.words, bow_filter=bow_filter) for s in story.sentences]
     return (max([len(s) for s in similarities]), similarities)
 
 
-def scoreAll(story, question_n, answer_n, bow_filter=None, bow_f=bow):
+def scoreAll(story, question_n, answer_n, bow_filter=None, bow_f=bowall):
     question = story.questions[question_n]
     answer = question.answers[answer_n]
-    qa_pair = question.qsentence.words + answer.words
-    lemma_story = [l for s in story.sentences for l in s.words]
-    similarities = bow_f(qa_pair, lemma_story, bow_filter=bow_filter)
+    qa_pair = qapair(question.qsentence,answer)
+    similarities = bow_f(qa_pair, story, bow_filter=bow_filter)
     return (len(similarities), similarities)
 
 
-def scoreComplement(story, question_n, answer_n, bow_filter=None, bow_f=bow):
+def scoreComplement(story, question_n, answer_n, bow_filter=None, bow_f=bowall):
     question = story.questions[question_n]
     answer = question.answers[answer_n]
-    qa_pair = question.qsentence.words + answer.words
-    lemma_story = [l for s in story.sentences for l in s.words]
-    similarities = bow_f(qa_pair, lemma_story, bow_filter=bow_filter)
+    qa_pair = qapair(question.qsentence,answer)
+    similarities = bow_f(qa_pair, story, bow_filter=bow_filter)
     return (len(answer.words) - len(similarities), similarities)
 
 
@@ -237,7 +253,7 @@ def predictAll(stories, opts=None):
         score_f=scoreAll,
         select_f=opts["select_f"] if "select_f" in opts else None,
         select_limit=opts["select_limit"] if "select_limit" in opts else None,
-        bow_f=opts["bow_f"] if "bow_f" in opts else bow
+        bow_f=opts["bow_f"] if "bow_f" in opts else bowall
     )
 
 
@@ -248,7 +264,7 @@ def predictAllNN(stories, opts=None):
         bow_filter="NN",
         select_f=opts["select_f"] if "select_f" in opts else None,
         select_limit=opts["select_limit"] if "select_limit" in opts else None,
-        bow_f=opts["bow_f"] if "bow_f" in opts else bow
+        bow_f=opts["bow_f"] if "bow_f" in opts else bowall
     )
 
 
@@ -258,7 +274,7 @@ def predictComplement(stories, opts=None):
         score_f=scoreComplement,
         select_f=opts["select_f"] if "select_f" in opts else None,
         select_limit=opts["select_limit"] if "select_limit" in opts else None,
-        bow_f=opts["bow_f"] if "bow_f" in opts else bow
+        bow_f=opts["bow_f"] if "bow_f" in opts else bowall
     )
 
 
@@ -269,7 +285,7 @@ def predictAllVB(stories, opts=None):
         bow_filter="VB",
         select_f=opts["select_f"] if "select_f" in opts else None,
         select_limit=opts["select_limit"] if "select_limit" in opts else None,
-        bow_f=opts["bow_f"] if "bow_f" in opts else bow
+        bow_f=opts["bow_f"] if "bow_f" in opts else bowall
     )
 
 if __name__ == "__main__":
