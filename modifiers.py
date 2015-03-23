@@ -7,16 +7,22 @@ from math import log
 sw = set(stopwords.words("english"))
 
 def baseline160(q,a,story):
-
+    
+    tokenize(q,a,story)
     lemmatize(q,a,story)
+    #coreference(q,a,story)
+    #hypernymy(q,a,story)
     stopwords(q,a,story)
     tokenfrequency(q,a,story)
 
 def baseline500(q,a,story):
 
+    tokenize(q,a,story)
+    lemmatize(q,a,story)
     coreference(q,a,story)
+    hypernymy(q,a,story)
     stopwords(q,a,story)
-    wordfrequency(q,a,story)
+    #wordfrequency(q,a,story)
 
 def settokens(story):
     
@@ -27,19 +33,19 @@ def coreference(q,a,story):
 
     for s in story.sentences:
         for t in s.wbow:
-            s.wbow[t] = [(c,1.0) for c in t.coreference()]
+            s.wbow[t].extend([(c,1.0) for c in t.coreference()])
 
 def lemmatize(q,a,story):
 
     for s in story.sentences:
         for t in s.wbow:
-            s.wbow[t] = [(t.lemma,1.0)]
+            s.wbow[t].append((t.lemma,1.0))
 
 def tokenize(q,a,story):
 
     for s in story.sentences:
         for t in s.wbow:
-            s.wbow[t] = [(t.token.lower(),1.0)]
+            s.wbow[t].append((t.token.lower(),1.0))
             
 def tokencount(t,story):
     
@@ -86,10 +92,10 @@ def hypernymy(q,a,story):
     for s in story.sentences:
         for t in s.wbow:
             if s.wbow[t]:
-                for y in t.synsense():
+                for y in t.synsets:
                     for h,d in y.dfs()[1:]:
-                        if d < 3:
-                            s.wbow[t].extend([(lx,0.5) for lx in h.lexname().split(" ")])
+                        if d < 4:
+                            s.wbow[t].append((h.lexname(),1.0/(1+d)))
 
 def simplenegate(q,a,story):
 

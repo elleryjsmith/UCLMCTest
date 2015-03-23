@@ -1,5 +1,6 @@
 from classes import storyparser, answers as ans
 from math import log
+from scoring import checkanswer
 from features.bow import XVectorQA
 from nltk.corpus import stopwords
 from sys import argv, stderr
@@ -20,11 +21,11 @@ def wordpairs(s1, s2):
 
 
 def hypernymbow(h1, h2):
-    return sum([h1[m] for m in (set(h1.keys()) & set(h2.keys()))])
+    return sum([h1[m] for m in (set(h1.keys()) & set(h2))])
 
 
 def hypernymbow_list(h1, h2):
-    return [h1[m] for m in (set(h1.keys()) & set(h2.keys()))]
+    return [h1[m] for m in (set(h1.keys()) & set(h2))]
 
 
 def treeanswerscore(story, question, ansnum, matchscore, wnscore):
@@ -48,14 +49,14 @@ def treeanswerscore(story, question, ansnum, matchscore, wnscore):
     return max(scores)
 
 
-def hypbowscore(story, q, a, bow_filter=None):
+def hypbowscore(story, q, a, bow_filter=None, bow_f=None):
     qn = story.questions[q]
-    qa = dict(qn.qsentence.hypernymy.items() + qn.answers[a].hypernymy.items())
+    qa = qn.qsentence.coreference + qn.answers[a].coreference
 
     return max([(hypernymbow(s.hypernymy, qa), s) for s in story.sentences])
 
 
-def hyptreescore(story, q, a, bow_filter=None):
+def hyptreescore(story, q, a, bow_filter=None, bow_f=None):
 
     return treeanswerscore(story, story.questions[q], a, match, wnmatch)
 
@@ -67,14 +68,14 @@ def hyp_q_select(story, question_n, sentence_n):
 
 
 def hyp_qa_select(story, question_n, sentence_n):
-    question = story.questions[question_n].qsentence.hypernymy
-    answers = {
-        l[0]: 1
+    question = story.questions[question_n].qsentence.coreference
+    answers = [
+        l
         for a in story.questions[question_n].answers
-        for l in a.hypernymy.items()
-    }
+        for l in a.coreference
+    ]
     sentence = story.sentences[sentence_n].hypernymy
-    return hypernymbow(dict(question.items() + answers.items()), sentence)
+    return hypernymbow(sentence,question + answers)
 
 
 def hypbow(stories, opts=None):
@@ -96,17 +97,19 @@ if __name__ == "__main__":
 
             stories = list(storyparser(dataset))
             answers = list(ans(dataset))
-            score = 0.0
+            score,answered = 0.0,0
             for i, story in enumerate(stories):
                 for j, question in enumerate(story.questions):
-                    score += checkanswer(
-                        answers, i, j,
-                        [
-                            hypbowscore(story, j, k, None)
-                            for k, a in enumerate(question.answers)
-                        ]
-                    )
+                    if 1 or question.mode:
+                        score += checkanswer(
+                            answers, i, j,
+                            [
+                                hypbowscore(story, j, k, None)
+                                for k, a in enumerate(question.answers)
+                                ]
+                            )
+                        answered += 1
 
-            print "%s: %f" % (dataset, score / ((i + 1) * 4))
+            print "%s: %f" % (dataset, score * 1.0 / answered)
     else:
         stderr.write("Usage: python %s <datasets> (e.g. mc160.dev)\n" % (argv[0]))

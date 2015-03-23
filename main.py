@@ -10,12 +10,12 @@ import svm_classifier as svmreg
 import numpy as np
 
 testsets = [
-    # "mc160.dev",
-    # "mc500.dev",
-    # "mc160.train",
-    # "mc500.train",
-    # ["mc160.dev", "mc160.train"],
-    # ["mc500.dev", "mc500.train"],
+     "mc160.dev",
+     "mc500.dev",
+     "mc160.train",
+     "mc500.train",
+     ["mc160.dev", "mc160.train"],
+     ["mc500.dev", "mc500.train"],
     "mc160.test",
     "mc500.test"
 ]
@@ -40,7 +40,7 @@ def _bowall1(stories, opts=None):
         score_f=bow.scoreAll,
         select_f=bow.bow_q_select_coref,
         select_limit=3,
-        bow_f=bow.coref_bow
+        bow_f=bow.coref_bowall
     )
 def _bowall2(stories, opts=None):
     return bow.XVectorQA(
@@ -49,7 +49,7 @@ def _bowall2(stories, opts=None):
         score_f=bow.scoreAll,
         select_f=bow.bow_qa_select_coref,
         select_limit=3,
-        bow_f=bow.coref_bow
+        bow_f=bow.coref_bowall
     )
 def _hypselect(stories, opts=None):
     return bow.XVectorQA(
@@ -111,13 +111,13 @@ def bigMixSum(stories, opts=None):
     return sum_v
 
 methods = [
-    dict(
-        name="_filter500",
-        score=_filter500,
-        opts=dict(
-            testsets=["mc500.test"],
-        )
-    ),
+    #dict(
+    #    name="_filter500",
+    #    score=_filter500,
+    #    opts=dict(
+    #        testsets=["mc500.test"],
+    #    )
+    #),
     # dict(
     #     name="BOW NN",
     #     score=bow.predictAllNN,
@@ -139,9 +139,9 @@ methods = [
     #         testsets=testsets
     #     )
     # ),
-    # dict(
+    #dict(
     #     name="BOW coref",
-    #     score=bow.predictAll,
+    #     score=bow.predict,
     #     opts=dict(
     #         testsets=testsets,
     #         bow_f=bow.coref_bow
