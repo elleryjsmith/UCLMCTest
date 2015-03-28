@@ -1,0 +1,38 @@
+\usepackage{framed}
+\usepackage{acl2014}
+\usepackage{times}
+\usepackage{url}
+\usepackage{latexsym}
+\usepackage{graphicx,xcolor}
+\usepackage{listings}
+\usepackage{tabularx}
+\usepackage{svg}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{tikz-dependency}
+\usetikzlibrary{%
+  shapes,%
+  arrows,%
+  positioning,%
+  calc,%
+  automata%
+}
+\definecolor{pf7}{RGB}{166, 118, 29}
+\definecolor{grey}{RGB}{250, 100, 100}
+
+
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\def\subtitle#1\par{\removelastskip\bigskip\hrule
+   \noindent\vrule height12pt depth5pt width0pt #1\par
+   \hrule\nobreak\medskip
+}
+\def\begalg{\removelastskip\medskip
+  \bgroup \parindent=0pt \tt \obeylines \obeyspaces  
+          \everymath{\catcode`\ =10 \catcode`\^^M=5 }
+}
+\def\endalg{\egroup\medskip} 
+{\obeyspaces\global\def {\ }}
+
+% \renewcommand{\arraystretch}{1.5}

@@ -1,0 +1,214 @@
+%
+% File acl2014.tex
+%
+
+\documentclass[11pt]{article}
+\usepackage{framed}
+\usepackage{acl2014}
+\usepackage{times}
+\usepackage{url}
+\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{listings}
+
+\def\subtitle#1\par{\removelastskip\bigskip\hrule
+   \noindent\vrule height12pt depth5pt width0pt #1\par
+   \hrule\nobreak\medskip
+}
+\def\begalg{\removelastskip\medskip
+  \bgroup \parindent=0pt \tt \obeylines \obeyspaces  
+          \everymath{\catcode`\ =10 \catcode`\^^M=5 }
+}
+\def\endalg{\egroup\medskip} 
+{\obeyspaces\global\def {\ }}
+
+\title{Solving MCTest with semantic textual similarity and matching rules??}
+
+\author
+       {A. Vlachos, T. Brown, N. Greco, G. Mocanu and E. Smith
+       \\
+       Computer Science Department\\
+  University College London\\
+       \tt{\{a.vlachos,t.brown,n.greco,g.mocanu,e.smith\}@cs.ucl.ac.uk}\\ 
+       }
+
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+MCTest is a recently developed test for evaluating Machine Comprehension.
+Our approach to the task is through textual similarity and shallow methods.
+We build a simple bag-of-words baseline and we enhance it through additional pre-processing (i.e. co-reference resolution, hypernym).
+We build a set of features and train a logistic classifier that we use to score multiple-choice answers.
+Finally we show how the introduction of simple matching rules system outperform current results on the MCTest.
+\end{abstract}
+
+\section{Introduction}
+% Emil ? % Tom X Ellery ?
+%1 page
+
+\section{Previous work}
+% Nicola ? % Tom ? % Emil ? Ellery ?
+%1 page
+
+\newcite{deep_selection} uses bag-of-words as a baseline combining this shallow method with convolutional neural networks to capture complex semantics of a sentence.
+
+\newcite{deepread} proposed D{\small EEP}R{\small EAD} with shallow methods for story comprehension and combine them with some heuristics to answer questions `who / what / when".
+
+\section{Task description}
+% Tom ? % Emil X Ellery ?
+%1/2 a page--
+
+The task has been presented in  \cite{mctest}
+
+\section{Baseline}
+% Nicola X % Ellery ?
+We propose a baseline system, a simpler version than the originally proposed by \newcite{mctest} only using simple lexical feature.
+This system matches a bag of words constructed from the question and a candidate answer with each sentence in the story.
+The question-answer pair with the most words in common is considered the best candidate answer.
+Normalization are applied such as removing stop words stemming to remove affixes from words.
+
+This semantic overlap approach treats the problem as a textual similarity task and would perform best when the pair is a subset of a sentence.
+However, this strategy ignores predicate-argument structure and can easily fail in the presence of quantifiers, negations or synonyms.
+Work on story comprehension using bag-of-words has a long history, \newcite{deepread} proposed D{\small EEP}R{\small EAD} and showed how such systems with some heuristics can achieve high accuracy especially on questions with ``who / what / when", which is most part of our questions.
+
+We will build upon this baseline in Section~\ref{sec:bagofwords} and combine it with heuristics in Section~\ref{sec:rulebased}.
+Results for MC160 and MC500 are shown in Table \ref{tab:resultBOWMC160} and Table \ref{tab:resultBOWMC500}.
+The baseline has been authored without seeing both the test sets.
+
+\begin{figure}
+
+\subtitle Definitions
+
+Passage $P$, $P_i$ sentence $i$ in passage $P$, set of words in question Q, set of words in candidate answer $A_{1..4}$ and set of stop words $X$.
+
+\subtitle Algorithm 1 Sentence level bag-of-words
+
+\begalg
+for $i$=1 to 4 do
+   $S$ = $A_i \cup Q$
+end for
+return $sw_{1\ldots4}$
+\endalg
+
+\caption{\label{fig:mct_example} Lexical-based baseline algorithm }
+\end{figure}
+
+\section{Pre-processing}
+% 2 pages
+Matching question-answer pairs with the story can be significantly improved by homogenising the format of all stories and question-answer strings. Our matching algorithms operate on raw textual tokens, which are lemmatized and stripped of all extraneous function words; however, the raw format was generated on-demand, rather than during the pre-processing stage, and we retained the deep grammatical structure of the text in order to dynamically alter the format based on certain question conditions.
+%transform the two to become more {\em similar} to each other and removing words that are noise in the text.
+%Previously discussed pre-processing of the text was removing stop words, tokenizing the text into sentences and into words, stemming words, and adding POS notation for which we used the Stanford Parser\footnote{Some note on the Stanford parser}
+%TODO
+
+We focused on four pre-processing stages that will be discussed in this section:
+syntactic parsing and coreference resolution, hypernym annotation, sentence selection and combining question and answer.
+
+
+\subsection{Syntactic Analysis}
+% Emil X % Ellery X
+
+
+The initial pre-processing stage used the Stanford Parser \cite{stanford_parser} and Stanford Dependencies \cite{de2008stanford} to obtain phrase-structure and dependency trees for each story, along with its questions and answers. We also made use of the lemmatization and Penn part-of-speech tagging \cite{marcus1993building} provided by this system. This toolkit performed well on the given data, due to the intentional linguistic simplicity of the stories. Of the few inconsistencies, the majority were due to incorrect recognition of invented brand names (e.g. “Cookies n’ Crème” and “Friendly-O’s”) and the inability to categorize some subordinate dependencies. However, such cases were rare, and the errors introduced at this pre-processing stage were negligible in the final results.
+
+Following this, coreference information was extracted using the Stanford CoreNLP package \cite{manning2014stanford}. The passage text was parsed independently of the question and answer strings, so all coreference chains were local to the story itself. Resolving links between a question and its answer strings proved to be detrimental to performance. We used an out-of-the-box configuration of the coreference rules, as this was deemed to perform adequately on the simplisitic format of the given stories. Some errors emerged when resolving coreferences involving multiple entities, however, but correcting these errors is beyond the scope of this work.
+\subsection{Hypernym}
+% Ellery X
+
+\subsection{Question answer combiner}
+% Tom X
+
+\section{Strategy}
+%1.5 pages
+\subsection{Bag of words}
+\label{sec:bagofwords}
+% Nicola X % Ellery ?
+several features
+BOWNN
+BOW Complement
+Bow ALL
+
+The great 6
+
+\subsection{Sentence selection}
+% Nicola X
+The current baseline chooses the best candidate on the basis of how much it matches one sentence in the corpus.
+This is a clear disadvantage give that the MCTest has questions whose answer may be in contained in multiple sentences;
+at the same time, running matching the bag of words between the text entire text with the question-answer pair would give poor results  since (%TODO give a better reason
+).
+
+To improve on answering questions using multiple sentences, we propose to run the bag-of-words between each question-answer pair and the $n$ most relevant sentences for each question.
+The idea is to find the most relevant sentence in which the answer of the question is contained.
+This problem reduces to an information retrieval task.
+Previous attempts of retrieving the sentences with the highest relevance for question answering have been already proved successful in the literature \cite{qa_techniques,deep_selection}. %TODO better context?
+The process consist in retrieving the top $n$ ranked documents, (in this case, sentences) for a query $Q$.
+All the sentences $S_i$ in the story $S$ are scored by a scoring function $Score(Q, S_i)$.
+
+Choosing the right query is as important as the implementation of the scoring function.
+Initially, our query was a stemmed version and without stop words of the question as the query $Q$.
+Following an evaluation on the MC160 development set, we found that in some cases the sentences retrieved were relevant to the question, but not to the answer.
+For example (see Figure~\ref{fig:mct_example}), although {\em ``Who was having a birthday?"} contains the right keyword {\em ``birthday"} to understand that the first sentence contains the answer, {\em ``How did Jessie get ready for the party?"} does not.
+Sentences like {\em ``She was having a party"} will very likely have an higher score than {\em ``She made a big cake, and hung up some balloons."} that exactly contains the correct answer $B$.
+Hence, we decided to use as a query a combination with the question with all of the four answers.
+
+For the purpose of this paper we are going to re-use our bag-of-words combined with hypernym and coreference to rank the most relevant sentences (in details in Section~\ref{sec:bigmix}).
+By tuning on both the {\small MC160} and {\small MC500} training set, we set $n=3$ as it performs best.
+
+\begin{figure}[!th]
+\begin{framed}
+\begin{flushleft}
+{\small Q0}: It was Jessie Bear's birthday. She was having a party.  She asked her two best friends to
+come to the party.  She made a big cake, and hung up some balloons.*\newline\newline
+1) Who was having a birthday?\\
+\textbf{A) Jessie Bear}\\
+B) no one\\
+C) Lion\\
+D) Tiger\newline\newline
+3) How did Jessie get ready for the party?\\
+A) made cake and juice.\\
+\textbf{B) made cake and hung balloons.}\\
+C) made juice and cookies.\\
+D) made juice and hung balloons.\newline\newline
+{\small  \textsuperscript{*}Only relevant part of question {\small Q0} has been reported}
+\end{flushleft}
+\end{framed}
+\caption{\label{fig:mct_example} Question Q0 from the MC160 development set}
+\end{figure}
+
+\subsection{Scoring function}
+% Nicola X
+equations of deep selection
+
+scoring question answer pairs
+the choice of the SVM and gridsearch
+\label{sec:bigmix}
+
+\subsection{Rule based system}
+\label{sec:rulebased}
+% Ellery X
+
+\section{Experiments and results}
+% Nicola ? % Emil ? % Tom?
+%1 page
+
+\section{Evaluation of strategies}
+% Ellery ?
+%3 pages
+
+\section{Future work and conclusion}
+% Ellery ? Tom ? Emil?
+%1/2 a page
+
+Semantic overlap is typically a symmetric relation while textual entailment is clearly not, this is a serious limitation of our baseline and the systems built on top.
+However, the great results show how really simple methods can achieve great results on the MCTest.
+
+Wordnet for synonym as well in addition to hypernym
+
+\section*{Acknowledgments}
+Thanks to
+
+% include your own bib file like this:
+\bibliographystyle{acl}
+\bibliography{ref}
+\end{document}

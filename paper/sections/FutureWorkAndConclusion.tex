@@ -1,0 +1,15 @@
+% Ellery ? Tom ? Emil?
+%1/2 a page
+
+%Semantic overlap is typically a symmetric relation while textual entailment is clearly not, this is a serious limitation of our baseline and the systems built on top. However, the great results show how really simple methods can achieve great results on the MCTest.
+%
+%hey i wrote a bit in the hypernym section about how i tried synonymy and it didn't work - the stories have such a small vocabulary its just noise
+%Usage of synonyms as well as hypernym. Use Word2vec or Wordnet to achieve this.
+%
+% also i tried BOW and BOW w/ sentence selection on my rule based thing and it wasn't as good as sliding window
+%A clear next step is to combine the rule-based system with the existing improved bag-of-words.
+%
+% i was thinking that the conclusion is: deeper methods are needed to solve mctest, since our system is almost at the limit of BOW matching. Tom was supposed to run an RTE system that would show this - idk if he did it though
+
+
+The baseline scoring function that we construct and the subsequent improvements that we make to it are clearly pushing the limits of a simple lexical-based algorithm, with these techniques being better suited to a textual similarity task than recognising textual entailment. Our rule-based system does however demonstrate some potential, and further work to explore its use could consist of using more sophisticated transformations to the story text in combination with a stronger baseline algorithm than our Sliding Window with Distance algorithm. Our analysis using the rule-based system does show that MC500 poses much more of a challenge to our shallow approach than MC160 does, and it is likely that in order to make significant improvements with MC500 a deeper understanding of natural language will be needed.
