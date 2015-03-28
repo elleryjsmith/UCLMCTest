@@ -1,0 +1,19 @@
+% Ellery X
+
+% version1
+%After the story text had been tokenized and annotated, we used the WordNet \cite{miller1995wordnet} interface provided by the Natural Language Toolkit \cite{bird2006nltk} to obtain basic semantic information for each token in the passage. During this stage, each token was paired with a subset of its WordNet synset tree.
+
+%After analysing patterns in the format of the question strings, we opted to consider only synonymy and hypernymy information as part of this task. Questions would typically contain a general word describing a certain category of object (e.g. "What animal...?"), and the text itself would contain a more specific reference to an entity (e.g. "Peter the puppy..."). By expanding the words in the story text with hypernymy information, a relation can be extracted between the entity reference in the question, and the mention in the passage (as shown in the example (3) in Figure~\ref{fig:preprocessing}). 
+
+%version2
+During the error analysis of our baseline system, we found that a number of questions would contain a general word describing a certain category of object (e.g. "What animal...?"), and the text itself would contain a more specific reference to an entity (e.g. "Jeff the dog..."). In such cases, lexical overlap between the question and the story is low, and our system struggled to locate the relevant portion of the text. However, if we view the words in a question as super-ordinates or co-ordinates of the words in the story, we can match words with a \textit{type-of} relation, in addition to lexical overlap.
+
+Based on the semantic substitution system of \newcite{angeli2014naturalli}, we aimed to augment our existing bag-of-words system by providing more generalized alternatives for certain words in the story text. To do this, we used the WordNet \cite{miller1995wordnet} interface provided by the Natural Language Toolkit \cite{bird2006nltk} to annotate each token in the story with synonymy and hypernymy information. However, rather than attempting to extract semantic relations using a token's synset tree, which is computationally expensive, we simply expand each story word to a series of hypernyms during the preprocessing stage. This has the advantage of being easy to integrate into our existing bag-of-words system, and the results of this augmentation are shown in Table \ref{fig:resultHypDev}. We observed a significant improvement on the MC500 stories, however, this addition was in fact detrimental to accuracy on the MC160.
+
+\begin{table}[h]
+\centering
+\input{./figures/resultHypDev.tex}
+\caption{\label{fig:resultHypDev} Dev+train results for the bag-of-words baseline augmented with hypernymy}
+\end{table}
+
+Synonymy, however, was used only as an experimental tool, and was not included in the final system. We hypothesised that, since these stories were written with an audience of young children in mind, and as such contained a relatively small lexicon, synonymy would merely produce additional noise. When it was included, any changes in our results varied significantly from one dataset to another, and selecting the most common sense of a word provided more accurate and stable results, thus confirming our hypothesis.

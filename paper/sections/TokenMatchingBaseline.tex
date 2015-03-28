@@ -1,0 +1,16 @@
+We propose a baseline scoring function, a simpler version compared to system proposed by \newcite{mctest} that only uses token matching (algorithm in Figure~\ref{fig:algoBOW}). Our system matches a bag-of-words constructed from the question and a candidate answer with each sentence in the story. The question-answer pair with the most words in common with a sentence in the text is considered the best candidate answer. Normalization are applied such as removing stop words stemming to remove affixes from words.
+
+\begin{figure}[!th]
+\input{./figures/algoBOW.tex}
+\caption{\label{fig:algoBOW} Lexical-based baseline algorithm }
+\end{figure}
+
+This semantic overlap approach treats the problem as a textual similarity task and would perform best when the pair is a subset of a sentence. However, this strategy ignores predicate-argument structure and can easily fail in the presence of quantifiers, negations or synonyms. Work on story comprehension using bag-of-words has a long history, \newcite{deepread} proposed D{\small EEP}R{\small EAD} and showed how such systems with some heuristics can achieve high accuracy especially on questions with ``who / what / when", which is most part of our questions.
+
+Results for MC160 and MC500 are shown in Table \ref{table:resultBOW}. The token-matching baseline has been authored without seeing both the test sets. The results are split for questions that need one sentence (``Single") or more sentence (``Multi") to answer the question. The 15\% drop between ``Single" and ``Multi" is due to choosing the most matching sentence in the text, hence multiple-sentence questions are clearly disadvantaged.
+
+\begin{table}[!th]
+\centering
+\input{./figures/resultBOW.tex}
+\caption{\label{table:resultBOW}Dev+train results for the bag-of-words baseline augmented with hypernym}
+\end{table}

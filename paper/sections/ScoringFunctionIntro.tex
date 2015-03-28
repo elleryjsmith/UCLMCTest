@@ -1,0 +1,13 @@
+We can model the challenge in the following way: assuming passage $P$ has a set of questions $Q$,  where each question $Q_i \in Q$ is associated with a list of answers $\{A_{i1}, A_{i2}, ..., A_{im}\}$ (in MCTest $m=4$) with associated judgement, $\{y_{i1}, y_{i2}, ..., y_{im}\}$ where $y_{ij}=1$ if the answer is correct, otherwise $y_{ij}=0$. Our task is to assign a score to a triple 
+
+\begin{equation}
+S_{ij}=Score(P, q_{i}, a_{ij})
+\end{equation}
+
+and choose the triple with the maximum score (or more, in case of equal score) as the chosen answer(s), $A_{i}$.
+
+\begin{equation}
+A_{i} = \{i : \max_{j=0}^{m}(S_{ij})\}
+\end{equation}
+
+Our approach is to construct a simple baseline scoring function and improve upon it. We will build a set of scoring function and combine their results to finally learn a new scoring function through a classifier over these triples so we can predict the judgment of other QA pairs.
