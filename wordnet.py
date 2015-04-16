@@ -22,12 +22,14 @@ def getlemma(word, stanfordpos):
 
     return lemmatizer.lemmatize(word,wnpos(stanfordpos))
 
+wnmap = dict()
+
 class WNToken(object):
 
     def __init__(self, synset):
 
         self.synset = synset
-        self.lemmas = []
+        #self.lemmas = []
         self.hypernyms = []
 
     @staticmethod
@@ -38,18 +40,26 @@ class WNToken(object):
         if not tpos or token.isproper():
             return []
 
-        return [WNToken.fromsynset(s) for s in wn.synsets(token.token,tpos)]
+        syns = [WNToken.fromsynset(s) for s in wn.synsets(token.token,tpos)]
 
+        return {n:d for syn in syns
+                for s,d in syn.dfs()
+                for n in s.lexname().split(" ")}
+                
     @staticmethod
     def fromsynset(synset):
-     
-        wnt = WNToken(synset.name())
 
-        for hye in synset.hypernyms():
-            wnt.hypernyms.append(WNToken.fromsynset(hye))
+        if synset.name() not in wnmap:
+            wnmap[synset.name()] = WNToken(synset.name())
+            
+        wnt = wnmap[synset.name()]
+
+        if not wnt.hypernyms:
+            for hye in synset.hypernyms():
+                wnt.hypernyms.append(WNToken.fromsynset(hye))
                 
-        for lma in synset.lemmas():
-            wnt.lemmas.append(lma.name())
+        #for lma in synset.lemmas():
+        #    wnt.lemmas.append(lma.name())
 
         return wnt
 
@@ -58,7 +68,7 @@ class WNToken(object):
 
         wnt = WNToken(entry["synset"])
 
-        wnt.lemmas = entry["lemmas"]       
+        #wnt.lemmas = entry["lemmas"]       
         wnt.hypernyms = [WNToken.fromcache(h) for h in entry["hypernyms"]]
 
         return wnt
@@ -173,7 +183,7 @@ class WNToken(object):
             
     def __str__(self):
 
-        return "Name: %s\nHypernyms: %s\nLemmas: %s\n" % (self.synset,self.hypernyms,self.lemmas)
+        return "Name: %s\nHypernyms: %s\n" % (self.synset,self.hypernyms)
 
     def __repr__(self):
 

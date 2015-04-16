@@ -10,8 +10,8 @@ def baseline160(q,a,story):
     
     tokenize(q,a,story)
     lemmatize(q,a,story)
-    #coreference(q,a,story)
-    #hypernymy(q,a,story)
+    coreference(q,a,story)
+    hypernymy(q,a,story)
     stopwords(q,a,story)
     tokenfrequency(q,a,story)
 
@@ -27,25 +27,26 @@ def baseline500(q,a,story):
 def settokens(story):
     
     for s in story.sentences:
-        s.wbow = odict([(t,[]) for t in s.words])
+        s.wbow = odict([(t,{}) for t in s.words])
 
 def coreference(q,a,story):
 
     for s in story.sentences:
         for t in s.wbow:
-            s.wbow[t].extend([(c,1.0) for c in t.coreference()])
+            for c in t.coreference():
+                s.wbow[t][c] = 1.0
 
 def lemmatize(q,a,story):
 
     for s in story.sentences:
         for t in s.wbow:
-            s.wbow[t].append((t.lemma,1.0))
+            s.wbow[t][t.lemma] = 1.0
 
 def tokenize(q,a,story):
 
     for s in story.sentences:
         for t in s.wbow:
-            s.wbow[t].append((t.token.lower(),1.0))
+            s.wbow[t][t.token.lower()] = 1.0
             
 def tokencount(t,story):
     
@@ -57,7 +58,7 @@ def wordcount(w,story):
     
     if w not in wccache[story]:
         wccache[story][w] = len([1 for s in story.sentences for t in s.wbow
-                                 if w in map(lambda x:x[0],s.wbow[t])])
+                                 if w in s.wbow[t]])
 
     return wccache[story][w]
 
@@ -71,31 +72,31 @@ def wordfrequency(q,a,story):
 
     for s in story.sentences:
         for t in s.wbow:
-            s.wbow[t] = [(w,wt * inversecount(w,story,wordcount))
-                         for w,wt in s.wbow[t]]
+            for w in s.wbow[t]:
+                ic = inversecount(w,story,wordcount)
+                s.wbow[t][w] *= ic
 
 def tokenfrequency(q,a,story):
 
     for s in story.sentences:
         for t in s.wbow:
-            ic = inversecount(t,story,tokencount)
-            s.wbow[t] = [(w,wt * ic) for w,wt in s.wbow[t]]
-
+            for w in s.wbow[t]:
+                s.wbow[t][w] *= inversecount(t,story,tokencount)
+            
 def stopwords(q,a,story):
 
     for s in story.sentences:
         for t in s.wbow:
-            s.wbow[t] = [(w,wt) for w,wt in s.wbow[t] if w not in sw]
+            for w in s.wbow[t].copy():
+                if w in sw:
+                    del s.wbow[t][w]
 
 def hypernymy(q,a,story):
     
     for s in story.sentences:
         for t in s.wbow:
-            if s.wbow[t]:
-                for y in t.synsets:
-                    for h,d in y.dfs()[1:]:
-                        if d < 4:
-                            s.wbow[t].append((h.lexname(),1.0/(1+d)))
+            for h in t.hypernymy:
+                s.wbow[t][h] = t.hypernymy[h]
 
 def simplenegate(q,a,story):
 

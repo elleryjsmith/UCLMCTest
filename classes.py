@@ -4,7 +4,7 @@ import csv
 import os
 from collections import deque, OrderedDict as odict
 from nltk.corpus import stopwords
-from wordnet import WNToken, getlemma
+#from wordnet import WNToken, getlemma
 
 sw = set(stopwords.words("english"))
 
@@ -50,7 +50,7 @@ class Sentence(object):
         s.parse = SentenceParse.fromcache(entry["parse"])
         s.words = s.parse.words().values()
         s.coreference = s._coreference()
-        s.hypernymy = s._hypernymy()
+        #s.hypernymy = s._hypernymy()
         return s
 
     def parserepr(self):
@@ -64,18 +64,12 @@ class Sentence(object):
 
         s = dict()
 
-        #for c in self.coreference:
         for c in ({t.lemma for t in self.words} - sw):
-            s[c] = 1.0
+            s[c] = 1.0     
         
-        weight = lambda x : 1.0 / (x+1)#pow(2,x)
-        
-        for w in [w for w in self.words if w.lemma in ({w.lemma for w in self.words} - sw)]:
-            for y in w.synsets:
-                for h,d in y.dfs()[1:]:
-                    if d < 4:
-                        if h.lexname() not in s or s[h.lexname()] < weight(d):
-                            s[h.lexname()] = weight(d)
+        for w in self.words:
+            for h in w.hypernymy:
+                s[h] = w.hypernymy[h]
         
         return s
 
@@ -143,7 +137,7 @@ class SentenceParse(object):
         sp.tokens[0].wordindex = 0
         for i,t in enumerate([t for _,t in sp.tokens.items() if t.isword()]):
             t.wordindex = i
-            t._getsynsets()
+            t._sethypers()
         sp.root = sp.tokens[0]
         sp.lemma = [t.tagged() for t in sp.words().values()]
         sp._unpackdeps(entry["dependencies"])
@@ -238,7 +232,8 @@ class Token(object):
         self.vis = 0
         self.index = index
         self.frequency = 0
-        self.synsets = []
+        self.synsets = dict()
+        self.hypernymy = dict()
 
     @staticmethod
     def fromcache(entry):
@@ -246,11 +241,19 @@ class Token(object):
         t = Token(entry["token"],entry["lemma"],entry["pos"],entry["index"])
         t.coref,t.subcoref = [e.lower() for e in entry["coref"]],entry["subcoref"]
         t.frequency = entry["frequency"]
+        t.synsets = entry["synsets"]
         return t
 
-    def _getsynsets(self):
+    def _sethypers(self):
 
-        self.synsets = WNToken.synsets(self)
+        if not self.isstopword():
+            self.hypernyms = {h:(1.0/(self.synsets[h]+1)) for h in self.synsets
+                              if self.synsets[h] < 4
+                              and h not in {self.lemma,self.token.lower()}}
+        
+    def isstopword(self):
+
+        return {self.token.lower(),self.lemma} & sw
 
     def synsense(self, sense=1):
         
@@ -262,10 +265,10 @@ class Token(object):
 
     def coreference(self):
         
-        if self.subcoref:
+        if self.subcoref or not self.isproper():
             return [self.lemma]
         else:
-            return [getlemma(w,self.pos) for w in self.coref] or [self.lemma]
+            return [w.lower() for w in self.coref] or [self.lemma]
 
     def mainpos(self):
 
@@ -419,7 +422,8 @@ class Token(object):
                 "index":self.index,
                 "coref":self.coref,
                 "subcoref":self.subcoref,
-                "frequency":self.frequency}
+                "frequency":self.frequency,
+                "synsets":self.synsets}
     
     def __str__(self):
 
