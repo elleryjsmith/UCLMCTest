@@ -3,15 +3,18 @@ from collections import OrderedDict as odict
 
 def weightedbow(s1,s2):
 
-    return sum([wt for v in s1.values() for w,wt in v if w in set(s2)])
+    return sum([v[w] for v in s1.values() for w in v if w in s2])
 
 def qapair(q,a):
     
+    #return ({t.token.lower() for t in q.qsentence.words + a.words} |
+    #        {t.lemma for t in q.qsentence.words + a.words})
+
     return (q.qsentence.coreference if q else []) + (a.coreference if a else [])
 
 def bow(q,a,story):
 
-    return max([(weightedbow(s.wbow,qapair(q,a)),s) for s in story.sentences])
+    return max([(weightedbow(s.wbow,qapair(q,a)),s) for s in story.sentences])[0]
 
 def bowall(q,a,story):
 
@@ -44,13 +47,14 @@ def setflg(f):
 def distance(q,a,story):
 
     qoccs,aoccs = [],[]
+
     qst = set(q.qsentence.coreference)
     ast = set(a.coreference) - qst
 
     i = 0
     for s in story.sentences:
         for t in s.wbow:
-            ts = {t.lemma,t.token.lower()} if flg160 else set(map(lambda x:x[0],s.wbow[t]))
+            ts = set(s.wbow[t].keys())
             if qst & ts:
                 qoccs.append(i)
             if ast & ts:
@@ -65,6 +69,42 @@ def distance(q,a,story):
     d = sum(dist) * 1.0 / len(dist)
 
     return (1.0 / (i - 1)) * d
+
+def selectsent(q,a,story):
+
+    top = sorted([(weightedbow(s.wbow,qapair(q,a)),s)
+                  for s in story.sentences])
+
+    return sum(map(lambda x:x[0],top[-2:]))
+
+MAXNGRAM = 20
+
+def getmaxngram():
+
+    return MAXNGRAM
+
+def setmaxngram(n):
+
+    global MAXNGRAM
+
+    MAXNGRAM = n
+    
+def ngram(q,a,story):
+
+    qa,ts = qapair(q,a),[]
+
+    for s in story.sentences:
+        for t in s.wbow:
+            if s.wbow[t]:
+                ts.append((t,s.wbow[t]))
+
+    mt = 0.0
+
+    for i in range(2,MAXNGRAM+1):
+        mt += max([weightedbow(odict(ts[j:j+i]),qa) * 1.0 / i
+                   for j in range(len(ts)-i)] + [0.0])
+
+    return mt
 
 def swdistance(q,a,story):
 

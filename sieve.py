@@ -36,18 +36,17 @@ def scorer(scoref, filters):
 
 
 
-stories = list(storyparser("mc160.test"))
-answers = list(ans("mc160.test"))
-
+stories = list(storyparser("mc160.dev"))
+answers = list(ans("mc160.dev"))
 
 basefilters = [Filter(None,md.baseline160)]
 
 impfilters = [Filter(None,md.baseline160),
               #Filter(None,md.hypernymy),
-              Filter(fl.whyquestion,md.whystory),
+              #Filter(fl.whyquestion,md.whystory),
               #Filter(fl.complexnegative,md.complexnegate),
-              Filter(fl.simplenegative,md.simplenegate),
-              Filter(fl.tempquestion,md.tempstory),
+              #Filter(fl.simplenegative,md.simplenegate),
+              #Filter(fl.tempquestion,md.tempstory),
               ]
     
 bsc = scorer(swdistance,basefilters)
@@ -55,10 +54,10 @@ imc = scorer(swdistance,impfilters)
 
 print "### mc160.test: %f%%" % (imc*100.0)
 
-for f in impfilters[1:]:
-    print f.compare(basefilters[0])
+#for f in impfilters[1:]:
+#    print f.compare(basefilters[0])
 
-
+exit()################################################
 stories = list(storyparser("mc500.test"))
 answers = list(ans("mc500.test"))
 
@@ -68,9 +67,9 @@ basefilters = [Filter(None,md.baseline500)]
 
 impfilters = [Filter(None,md.baseline500),
               #Filter(None,md.hypernymy),
-              Filter(fl.whyquestion,md.whystory),
+              #Filter(fl.whyquestion,md.whystory),
               #Filter(fl.complexnegative,md.complexnegate),
-              Filter(fl.simplenegative,md.simplenegate),
+              #Filter(fl.simplenegative,md.simplenegate),
               #Filter(fl.tempquestion,md.tempstory),
               ]
     

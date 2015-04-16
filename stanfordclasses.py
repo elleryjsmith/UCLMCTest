@@ -226,6 +226,9 @@ class JSentenceParse(classes.SentenceParse):
                 t.wordindex = j
                 j += 1
                 
+        for t in tkn:
+            if t.isword():
+                t._getsynsets()
 
         sp.lemma = [t.tagged() for i,t in sp.tokens.items()]
 
@@ -308,6 +311,10 @@ class JToken(classes.Token):
                 
                 if t.lemma == self.lemma:
                     self.frequency += 1
+
+    def _getsynsets(self):
+
+        self.synsets = WNToken.synsets(self)
 
     def __repr__(self):
 
