@@ -5,7 +5,9 @@ from scorers import checkscores
 import sys
 
 import numpy as np
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import SGDClassifier
+from sklearn.naive_bayes import GaussianNB
 
 
 def load_scores(dataset):
@@ -59,10 +61,18 @@ if __name__ == "__main__":
     train_y = np.array(true_train)
     test_y = np.array(true_test)
 
-    C = 1e2
-    model = LogisticRegression(C=C).fit(train_X, train_y)
-    X = model.predict_proba(test_X)
+    model_logreg = LogisticRegressionCV().fit(train_X, train_y)
+    X_logreg = model_logreg.predict_proba(test_X)
+    results_logreg = checkscores(answers_test, [x[1] for x in X_logreg])
 
-    results = checkscores(answers_test, [x[1] for x in X])
+    model_svc = SGDClassifier(loss='log').fit(train_X, train_y)
+    X_svc = model_svc.predict_proba(test_X)
+    results_svc = checkscores(answers_test, [x[1] for x in X_svc])
 
-    print results
+    model_gauss = GaussianNB().fit(train_X, train_y)
+    X_gauss = model_gauss.predict_proba(test_X)
+    results_gauss = checkscores(answers_test, [x[1] for x in X_gauss])
+
+    print results_logreg
+    print results_svc
+    print results_gauss
