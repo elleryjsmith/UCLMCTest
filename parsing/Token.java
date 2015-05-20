@@ -1,0 +1,219 @@
+import java.util.*;
+import java.lang.*;
+import org.json.*;
+
+class Token
+{
+
+  private String token, lemma, pos;
+  private boolean punct, subcoref, stopword;
+  private List<String> coref = new ArrayList<String>();
+  private double tokidf, lemidf;
+  private Map<String,Double> crtidf = new HashMap<String,Double>();
+  private Matches matches;
+
+  public Token(String t, String l, String p, boolean pc)
+  {
+    
+    this.token = t.toLowerCase();
+    this.lemma = l.toLowerCase();
+    this.pos = p;
+    this.punct = pc;
+    this.subcoref = false;
+    this.stopword = Stopwords.stopwords.contains(this.token);
+    this.matches = new Matches(this);
+
+  }
+
+  public void setcoref(List<Token> crf)
+  {
+
+    for(Token t : crf)
+      coref.add(t.gettoken());
+
+  }
+
+  public void setsubcoref(boolean b)
+  {
+
+    subcoref = b;
+
+  }
+
+  public void setstopword(boolean b)
+  {
+
+    stopword = b;
+
+  }
+
+  private double count(String wd, List<String> st)
+  {
+
+    double c = 0;
+
+    for(String s : st)
+      if(wd.equals(s))
+	++c;
+
+    return Math.log(1 + (1 / (1 + c)));
+
+  }
+
+  public void tokcount(List<String> st)
+  {
+
+    tokidf = count(token,st);
+
+  }
+
+  public void lemcount(List<String> st)
+  {
+
+    lemidf = count(lemma,st);
+
+  }
+
+  public void crtcount(List<String> st)
+  {
+
+    for(String s : coref)
+      crtidf.put(s,count(s,st));
+
+  }
+
+  public void setmatches(Question q)
+  {
+
+    matches.setmatches(q);
+
+  }
+
+  public String gettoken()
+  {
+
+    return token;
+
+  }
+
+  public String getlemma()
+  {
+
+    return lemma;
+
+  }
+
+  public String getpos()
+  {
+
+    return pos;
+
+  }
+
+  public List<String> getcoref()
+  {
+    
+    return coref;
+    
+  }
+
+  public double gettokidf()
+  {
+
+    return tokidf;
+
+  }
+
+  public double getlemidf()
+  {
+
+    return lemidf;
+
+  }
+
+  public Map<String,Double> getcrtidf()
+  {
+
+    return crtidf;
+
+  }
+  
+  public boolean ispunct()
+  {
+
+    return punct;
+
+  }
+
+  public boolean issubcoref()
+  {
+
+    return subcoref;
+
+  }
+  
+  public boolean hascoref()
+  {
+
+    return subcoref || (coref.size() > 0);
+
+  }
+
+  public boolean isstopword()
+  {
+    
+    return stopword;
+
+  }
+
+  public JSONObject tojson() throws JSONException
+  {
+
+    JSONObject t = new JSONObject();
+
+    JSONObject tk = new JSONObject();
+    tk.put("word",token);
+    tk.put("idf",tokidf);
+
+    JSONObject lm = new JSONObject();
+    lm.put("word",lemma);
+    lm.put("idf",lemidf);
+
+    t.put("token",tk);
+    t.put("lemma",lm);
+
+    JSONArray crfs = new JSONArray();
+
+    for(String s : coref)
+    {
+
+      JSONObject c = new JSONObject();
+
+      c.put("word",s);
+      c.put("idf",crtidf.get(s));
+
+      crfs.put(c);
+
+    }
+
+    t.put("coreference",crfs);
+
+    t.put("pos",pos);
+    t.put("punctuation",punct);
+    t.put("stopword",stopword);
+    t.put("subcoref",subcoref);
+
+    t.put("matches",matches.tojson());
+
+    return t;
+
+  }
+
+  public String toString()
+  {
+
+    return "Token: " + token + ", Lemma: " + lemma + ", POS: " + pos;
+
+  }
+
+}
