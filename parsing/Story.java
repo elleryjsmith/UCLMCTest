@@ -176,7 +176,7 @@ class Story
 	int bofs = sentoffsets.get(m.sentNum - 1) + (m.startIndex - 1);
 	int lofs = sentoffsets.get(m.sentNum - 1) + (m.endIndex - 1);
 	
-	tokens.get(bofs).setcoref(mntoks);
+	tokens.get(bofs).setcoref(mntoks,tokens.get(sofs));
 
 	for(Token t : tokens.subList(bofs + 1,lofs))
 	  t.setsubcoref(true);
@@ -276,11 +276,14 @@ class Story
     JSONArray t = new JSONArray();
     JSONArray qn = new JSONArray();
     JSONArray ql = new JSONArray();
+    JSONArray sm = new JSONArray();
 
     JSONArray s = new JSONArray(sentoffsets);
 
     for(Token tk : tokens)
       t.put(tk.tojson());
+
+
 
     for(Question q : questions)
     {
@@ -293,6 +296,7 @@ class Story
       ql.put(lens);
 
       qn.put(q.isnegative());
+      sm.put(q.getmode());
 
     }
 
@@ -300,6 +304,7 @@ class Story
     j.put("qalengths",ql);
     j.put("negativeqs",qn);
     j.put("sentenceoffsets",s);
+    j.put("multiqs",sm);
 
     return j;
 

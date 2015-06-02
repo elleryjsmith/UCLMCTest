@@ -10,6 +10,8 @@ class Token
   private List<String> coref = new ArrayList<String>();
   private double tokidf, lemidf;
   private Map<String,Double> crtidf = new HashMap<String,Double>();
+  private Token rep;
+  private double origidf = 1.0;
   private Matches matches;
 
   public Token(String t, String l, String p, boolean pc)
@@ -25,11 +27,13 @@ class Token
 
   }
 
-  public void setcoref(List<Token> crf)
+  public void setcoref(List<Token> crf, Token r)
   {
 
     for(Token t : crf)
       coref.add(t.gettoken());
+
+    rep = r;
 
   }
 
@@ -79,6 +83,9 @@ class Token
 
     for(String s : coref)
       crtidf.put(s,count(s,st));
+
+    if(rep != null)
+      origidf = rep.gettokidf();
 
   }
 
@@ -199,13 +206,20 @@ class Token
     t.put("coreference",crfs);
 
     t.put("pos",pos);
-    t.put("punctuation",punct);
-    t.put("stopword",stopword);
-    t.put("subcoref",subcoref);
+    t.put("stopword",btoi(stopword));
+    t.put("subcoref",btoi(subcoref));
+    t.put("origidf",origidf);
 
     t.put("matches",matches.tojson());
 
     return t;
+
+  }
+
+  private int btoi(boolean b)
+  {
+
+    return b ? 1 : 0;
 
   }
 

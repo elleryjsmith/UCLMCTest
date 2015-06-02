@@ -94,10 +94,10 @@ class Question
 
   }
 
-  public String getmode()
+  public int getmode()
   {
 
-    return mode == SINGLE ? "single" : "multi";
+    return mode;
 
   }
   

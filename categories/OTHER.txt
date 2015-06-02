@@ -1,0 +1,5 @@
+mc500.train.66,0
+mc500.train.76,0
+mc500.train.78,3
+mc500.train.114,0
+mc500.train.236,1
