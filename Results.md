@@ -14,10 +14,10 @@
 | 3 sentences | 75.27 | 75.19 | 65.46 | 64.50 |
 | 4 sentences | 74.52 | 74.44 | 64.00 | 63.82 |
 #Test Results
-| Description | MC160 | MC160 (With Rules) | MC500 | MC500 (With Rules)
-|---|---|---|---|---|
-| Without RTE | 72.19 | 70.94 | 63.17 | 61.33 |
-| With RTE | 74.27 (+2.08) | 72.60 (+1.67) | 65.96 (+2.79) | 64.96 (+3.62)
+| Description | MC160 | MC500 |
+|---|---|---|
+| Without RTE | 72.19 | 63.17 |
+| With RTE | 74.27 (+2.08) | 65.96 (+2.79) |
 #Single/Multi Split
 | Type | MC160 | MC500 | MC160 (No Rules) | MC500 (No Rules) |
 |---|---|---|---|---|
