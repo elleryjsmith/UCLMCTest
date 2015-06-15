@@ -8,10 +8,10 @@ class Token
   private String token, lemma, pos;
   private boolean punct, subcoref, stopword;
   private List<String> coref = new ArrayList<String>();
-  private double tokidf, lemidf;
-  private Map<String,Double> crtidf = new HashMap<String,Double>();
+  private float tokidf, lemidf;
+  private Map<String,Float> crtidf = new HashMap<String,Float>();
   private Token rep;
-  private double origidf = 1.0;
+  private float origidf = 1.0;
   private Matches matches;
 
   public Token(String t, String l, String p, boolean pc)
@@ -51,10 +51,10 @@ class Token
 
   }
 
-  private double count(String wd, List<String> st)
+  private float count(String wd, List<String> st)
   {
 
-    double c = 0;
+    float c = 0;
 
     for(String s : st)
       if(wd.equals(s))
@@ -124,21 +124,21 @@ class Token
     
   }
 
-  public double gettokidf()
+  public float gettokidf()
   {
 
     return tokidf;
 
   }
 
-  public double getlemidf()
+  public float getlemidf()
   {
 
     return lemidf;
 
   }
 
-  public Map<String,Double> getcrtidf()
+  public Map<String,Float> getcrtidf()
   {
 
     return crtidf;

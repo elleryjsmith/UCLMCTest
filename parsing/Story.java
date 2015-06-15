@@ -278,6 +278,11 @@ class Story
     JSONArray ql = new JSONArray();
     JSONArray sm = new JSONArray();
 
+    JSONArray qtk = new JSONArray();
+    JSONArray atk = new JSONArray();
+    JSONArray qlm = new JSONArray();
+    JSONArray alm = new JSONArray();
+
     JSONArray s = new JSONArray(sentoffsets);
 
     for(Token tk : tokens)
@@ -298,6 +303,47 @@ class Story
       qn.put(q.isnegative());
       sm.put(q.getmode());
 
+      
+      JSONArray qtnt = new JSONArray();
+      JSONArray qtnl = new JSONArray();
+      
+      for(Token tn : q.getqtoks())
+      {
+
+	qtnt.put(tn.gettoken());
+	qtnl.put(tn.getlemma());
+
+      }
+
+      qtk.put(qtnt);
+      qlm.put(qtnl);
+
+
+      JSONArray atnt = new JSONArray();
+      JSONArray atnl = new JSONArray();
+      
+      for(List<Token> a : q.getatoks())
+      {
+
+	JSONArray tk = new JSONArray();
+	JSONArray lm = new JSONArray();
+	
+	for(Token tn : a)
+	{
+
+	  tk.put(tn.gettoken());
+	  lm.put(tn.getlemma());
+
+	}
+
+	atnt.put(tk);
+	atnl.put(lm);
+
+      }
+
+      atk.put(atnt);
+      alm.put(atnl);
+
     }
 
     j.put("tokens",t);
@@ -305,6 +351,10 @@ class Story
     j.put("negativeqs",qn);
     j.put("sentenceoffsets",s);
     j.put("multiqs",sm);
+    j.put("qtokens",qtk);
+    j.put("atokens",atk);
+    j.put("qlemmas",qlm);
+    j.put("alemmas",alm);
 
     return j;
 

@@ -1,0 +1,10 @@
+mc160.train.7,3
+mc160.train.22,1
+mc160.train.22,3
+mc160.train.30,3
+mc160.train.35,2
+mc160.train.35,3
+mc160.train.37,1
+mc160.train.41,2
+mc160.train.43,0
+mc160.train.45,0

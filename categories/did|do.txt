@@ -1,6 +1,0 @@
-mc500.train.11,0
-mc500.train.192,2
-mc500.train.192,3
-mc500.train.199,3
-mc500.train.228,0
-mc500.train.296,1
