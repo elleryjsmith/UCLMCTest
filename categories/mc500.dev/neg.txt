@@ -1,0 +1,10 @@
+mc500.dev.8,1
+mc500.dev.15,0
+mc500.dev.23,2
+mc500.dev.25,1
+mc500.dev.27,2
+mc500.dev.38,1
+mc500.dev.38,2
+mc500.dev.40,1
+mc500.dev.44,3
+mc500.dev.49,1

@@ -107,8 +107,17 @@ class Matches
     JSONArray qc = new JSONArray();
 
     for(Map<String,Boolean> c : qcrtmatch)
-      qc.put(new JSONObject(c));
+    {
 
+      JSONObject qcr = new JSONObject();
+      
+      for(String s : c.keySet())
+	qcr.put(s,btoi(c.get(s)));
+
+      qc.put(qcr);
+
+    }
+    
     JSONArray ac = new JSONArray();
 
     for(Map<String,List<Boolean>> c : acrtmatch)

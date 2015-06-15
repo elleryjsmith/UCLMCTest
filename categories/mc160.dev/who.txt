@@ -1,0 +1,17 @@
+mc160.dev.0,0
+mc160.dev.0,1
+mc160.dev.1,0
+mc160.dev.5,3
+mc160.dev.8,1
+mc160.dev.15,0
+mc160.dev.16,0
+mc160.dev.18,1
+mc160.dev.23,1
+mc160.dev.24,0
+mc160.dev.24,2
+mc160.dev.24,3
+mc160.dev.26,3
+mc160.dev.27,0
+mc160.dev.27,2
+mc160.dev.28,3
+mc160.dev.29,1
