@@ -220,6 +220,7 @@ mc500.test.105,0
 mc500.test.105,3
 mc500.test.106,3
 mc500.test.107,1
+mc500.test.107,2
 mc500.test.108,3
 mc500.test.109,1
 mc500.test.109,2
@@ -252,6 +253,7 @@ mc500.test.122,0
 mc500.test.122,1
 mc500.test.122,3
 mc500.test.123,0
+mc500.test.123,3
 mc500.test.124,2
 mc500.test.124,3
 mc500.test.125,0
@@ -261,6 +263,7 @@ mc500.test.127,0
 mc500.test.127,1
 mc500.test.127,2
 mc500.test.127,3
+mc500.test.128,0
 mc500.test.128,1
 mc500.test.128,2
 mc500.test.129,0

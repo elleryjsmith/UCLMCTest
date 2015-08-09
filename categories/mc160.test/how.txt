@@ -14,6 +14,7 @@ mc160.test.26,1
 mc160.test.27,0
 mc160.test.30,0
 mc160.test.30,3
+mc160.test.31,3
 mc160.test.35,3
 mc160.test.47,3
 mc160.test.49,1

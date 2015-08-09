@@ -180,6 +180,16 @@ def bowall(matches, story, q, a, qm, am):
 
     return sum(matches)
 
+def sentselect(matches, story, q, a, qm, am):
+
+    prev,scores = 0,[]
+    
+    for sent in story["sentenceoffsets"]:
+        scores.append(sum(matches[prev:sent]))
+        prev = sent
+
+    return sum(sorted(scores)[-2:])
+        
 def rte():
     
     pass
@@ -206,7 +216,7 @@ def grade(scores, answers, result=True):
     
     return (sum(grades) * 1.0 / len(grades)) if result else grades
 
-def scoreset(stories, answers, rtescores, settype, flags, result=True):
+def scoreset(stories, answers, rtescores, settype, flags, result=True, grd=True):
 
     allscores = []
 
@@ -220,16 +230,16 @@ def scoreset(stories, answers, rtescores, settype, flags, result=True):
         allscores.append([s * scorefs[scoref][settype + "weight"]
                           for s in scores])
  
-    return grade(map(sum,zip(*allscores)),answers,result)
+    return grade(map(sum,zip(*allscores)),answers,result) if grd else map(sum,zip(*allscores))
 
 
-def scorewithflags(devtest, flags, rte=False, result=False):
+def scorewithflags(devtest, flags, rte=False, result=False, grade=True):
  
     return {l:{n:scoreset(s["stories"],
                           s["answers"],
                           s["rtescores"] if rte else fakerte(s["stories"]),
                           s["settype"],
-                          f,result=result)
+                          f,result=result,grd=grade)
                for n,s in datasets[devtest].items()}
             for l,f in flags.items()}
 
@@ -247,7 +257,7 @@ def getflags(flags):
 
     return default
             
-def scoredevtrain(verbose=False):
+def scoredataset(split, verbose=False, grade=True):
 
     if verbose:
         flags = {"base":getflags({"word":"token","negation":False,
@@ -261,36 +271,8 @@ def scoredevtrain(verbose=False):
                  "norules":getflags({"categorise":False,"negation":False}),
                  "best":getflags({})}
 
-    return scorewithflags("devtrain",flags)
-
-def windowscores():
-
-    global WINMULT
-
-    oldwm = WINMULT
-    winscores = dict()
-
-    for i in range(1,5):
-
-        WINMULT = i
-
-        flags = {"best":getflags({}),
-                 "norules":getflags({"categorise":False})}
-
-        winscores[i] = scorewithflags("devtrain",flags)
-
-    WINMULT = oldwm
-
-    return winscores
-
-def testscores():
-
-    return {"rte":scorewithflags("test",{"norules":getflags({"categorise":False}),
-                                         "rules":getflags({})},rte=True),
-            "norte":scorewithflags("test",{"rules":getflags({}),
-                                           "norules":getflags(
-                                               {"categorise":False})})}
-    
+    return {"rte":scorewithflags(split,flags,rte=True,grade=grade),
+            "norte":scorewithflags(split,flags,rte=False,grade=grade)}
 
 scorefs = {distance:{"mc160weight":10,
                      "mc500weight":11,
@@ -301,7 +283,7 @@ scorefs = {distance:{"mc160weight":10,
                                  hypernymy=False,
                                  categorise=False)
                      },
-           
+        
            impslidingwindow:{"mc160weight":1,
                              "mc500weight":1,
                              "args":dict(word="lemma",
@@ -309,7 +291,7 @@ scorefs = {distance:{"mc160weight":10,
                                          stopwords=True,
                                          negation=True,
                                          hypernymy=False,
-                                         categorise=True)
+                                         categorise=False)
                              },
            
            bowall:{"mc160weight":1,
@@ -321,9 +303,19 @@ scorefs = {distance:{"mc160weight":10,
                                hypernymy=False,
                                categorise=True)
                    },
+
+           sentselect:{"mc160weight":1,
+                       "mc500weight":1,
+                       "args":dict(word="lemma",
+                                   coref=False,
+                                   stopwords=False,
+                                   negation=True,
+                                   hypernymy=False,
+                                   categorise=True)
+                      },
            
-           rte:{"mc160weight":40,
-                "mc500weight":25,
+           rte:{"mc160weight":50,
+                "mc500weight":19,
                 "args":dict()
                 },
            
@@ -333,8 +325,8 @@ categories = {"what":True,
               "did/do":False,
               "multiple sentences":False,
               "neg":False,
-              "who":False,
-              "when":False,
+              "who":True,
+              "when":True,
               "CD":True,
               "how":False,
               "OTHER":False,
@@ -342,4 +334,4 @@ categories = {"what":True,
               "which":True,
               "where":True,
               "why":False,
-              "whose":False}
+              "whose":True}

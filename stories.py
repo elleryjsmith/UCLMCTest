@@ -23,10 +23,32 @@ def ans(dataset):
         return map(corr,reduce(list.__add__,csv.reader(fl,delimiter='\t')))
 
     
-datasets = {"devtrain":{"160":{"stories":(loadstories("mc160.dev") +
+datasets = {"dev":{"160":{"stories":loadstories("mc160.dev"),
+                               "answers":ans("mc160.dev"),
+                               "rtescores":loadrte("mc160.dev"),
+                               "settype":"mc160",
+                               },
+                        "500":{"stories":loadstories("mc500.dev"),
+                               "answers":ans("mc500.dev"),
+                               "rtescores":loadrte("mc500.dev"),
+                               "settype":"mc500",
+                               },
+                   },
+            "train":{"160":{"stories":loadstories("mc160.train"),
+                               "answers":ans("mc160.train"),
+                               "rtescores":loadrte("mc160.train"),
+                               "settype":"mc160",
+                               },
+                        "500":{"stories":loadstories("mc500.train"),
+                               "answers":ans("mc500.train"),
+                               "rtescores":loadrte("mc500.train"),
+                               "settype":"mc500",
+                               },
+                    },
+            "devtrain":{"160":{"stories":(loadstories("mc160.dev") +
                                           loadstories("mc160.train")),
                                "answers":(ans("mc160.dev") +
-                                          ans("mc160.train")),
+                                         ans("mc160.train")),
                                "rtescores":(loadrte("mc160.dev") +
                                             loadrte("mc160.train")),
                                "settype":"mc160",
