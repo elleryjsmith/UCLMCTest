@@ -138,7 +138,7 @@ def printcategories(name, scores, heading=True):
            "| MC160 (No Rules) | MC160 (Coref on All) "
            "| MC500 % of Questions | MC500 (With Rules) "
            "| MC500 (No Rules) | MC500 (Coref on All) |")
-    print "|---|---|---|---|---|---|---|"
+    print "|---|---|---|---|---|---|---|---|---|"
 
     row = ("| %s | %.2f (%d) | %.2f (%+.2f) | %.2f (%+.2f) | %.2f (%+.2f) |"
            " %.2f (%d) | %.2f (%+.2f) | %.2f (%+.2f) | %.2f (%+.2f) |")
