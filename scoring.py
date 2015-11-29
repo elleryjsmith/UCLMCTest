@@ -334,4 +334,8 @@ categories = {"what":True,
               "which":True,
               "where":True,
               "why":False,
-              "whose":True}
+              "whose":True,
+              "temporal":False,
+              "narrative":False,
+              "quantmod":False,
+              "has pronoun":False}
